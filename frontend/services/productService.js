@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/products";
+const API_URL = "https://muthu-crackers-backend.onrender.com/api/products";
 
 export async function getProducts(page = 1, search = "", category = "") {
   let url = `${API_URL}?page=${page}`;
