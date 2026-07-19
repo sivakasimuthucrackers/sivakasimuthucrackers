@@ -11,7 +11,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://muthu-crackers-backend.onrender.com";
 
 const emptyForm = {
   title: "",
