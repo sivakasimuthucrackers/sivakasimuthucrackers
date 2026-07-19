@@ -7,7 +7,7 @@ import {
   FaTruck,
 } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000/api/orders";
+const API_URL = "https://muthu-crackers-backend.onrender.com/api/orders";
 
 export default function OrderTrackingPage() {
   const [identifier, setIdentifier] = useState("");
