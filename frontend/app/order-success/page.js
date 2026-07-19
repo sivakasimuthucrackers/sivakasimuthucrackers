@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   FaCheckCircle,
@@ -11,7 +12,7 @@ import {
 
 const WHATSAPP_NUMBER = "917010400258";
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
 
   const orderNumber =
@@ -91,5 +92,23 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function OrderSuccessLoading() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#080808] px-5 py-20">
+      <p className="text-lg font-bold text-gray-300">
+        Loading order details...
+      </p>
+    </main>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<OrderSuccessLoading />}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }
