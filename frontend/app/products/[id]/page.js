@@ -15,7 +15,7 @@ import {
 
 import { useCart } from "@/context/CartContext";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://muthu-crackers-backend.onrender.com";
 const WHATSAPP_NUMBER = "917010400258";
 
 export default function ProductDetailsPage() {
