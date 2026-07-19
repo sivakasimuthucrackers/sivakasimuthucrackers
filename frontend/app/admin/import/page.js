@@ -6,7 +6,7 @@ import {
   FaUpload,
 } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000/api/import";
+const API_URL = "https://muthu-crackers-backend.onrender.com/api/import";
 
 export default function ImportProductsPage() {
   const [file, setFile] = useState(null);
