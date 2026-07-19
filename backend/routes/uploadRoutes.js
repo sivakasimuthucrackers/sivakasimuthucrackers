@@ -64,7 +64,7 @@ router.post(
       });
     }
 
-    const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const imageUrl = `https://muthu-crackers-backend.onrender.com/uploads/${req.file.filename}`;
 
     res.json({
       success: true,
