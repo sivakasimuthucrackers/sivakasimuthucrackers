@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:5000/api/gallery";
+const API_URL = "https://muthu-crackers-backend.onrender.com/api/gallery";
 
 const emptyForm = {
   title: "",
