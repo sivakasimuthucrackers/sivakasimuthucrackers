@@ -10,7 +10,7 @@ import {
 
 import ProductCard from "./ProductCard";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://muthu-crackers-backend.onrender.com/";
 const ITEMS_PER_PAGE = 12;
 
 export default function ProductList() {
