@@ -11,7 +11,9 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 
-const API_URL = "https://muthu-crackers-backend.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://muthu-crackers-backend.onrender.com";
 
 export default function TopBar() {
   const [settings, setSettings] = useState({});
@@ -30,11 +32,29 @@ export default function TopBar() {
         "Opp AJ Polytechnic College, Near Sankari Mahal, Sattur Sivakasi Road, Konampatti"
       );
 
-  const socialLinks = [
-    { url: settings.facebookUrl, icon: FaFacebookF, label: "Facebook" },
-    { url: settings.instagramUrl, icon: FaInstagram, label: "Instagram" },
-    { url: settings.youtubeUrl, icon: FaYoutube, label: "YouTube" },
-  ];
+const socialLinks = [
+  {
+    url:
+      settings.facebookUrl ||
+      "https://www.facebook.com/share/1DMNA6HUZf/",
+    icon: FaFacebookF,
+    label: "Facebook",
+  },
+  {
+    url:
+      settings.instagramUrl ||
+      "https://www.instagram.com/muthucrackers",
+    icon: FaInstagram,
+    label: "Instagram",
+  },
+  {
+    url:
+      settings.youtubeUrl ||
+      "https://www.youtube.com/@muthucrackers",
+    icon: FaYoutube,
+    label: "YouTube",
+  },
+];
 
   return (
     <div className="border-b border-white/10 bg-black text-xs text-gray-300">
@@ -59,8 +79,7 @@ export default function TopBar() {
         <div className="flex items-center gap-3">
           <span className="hidden md:inline">Follow us:</span>
 
-          {socialLinks.map(({ url, icon: Icon, label }) =>
-            url ? (
+          {socialLinks.map(({ url, icon: Icon, label }) =>)
               <a
                 key={label}
                 href={url}
@@ -71,16 +90,7 @@ export default function TopBar() {
               >
                 <Icon />
               </a>
-            ) : (
-              <span
-                key={label}
-                title={`Add ${label} URL in Admin Settings`}
-                className="cursor-not-allowed text-gray-700"
-              >
-                <Icon />
-              </span>
-            )
-          )}
+            ))}
 
           <a href="https://wa.me/917010400258" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-bold text-green-500">
             <FaWhatsapp />
