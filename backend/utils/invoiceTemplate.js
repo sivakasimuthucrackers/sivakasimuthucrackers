@@ -356,6 +356,12 @@ export function getInvoiceData(order) {
         order.mobile ||
         order.phone ||
         "",
+
+      email:
+        customer.email ||
+        order.customer?.email ||
+        order.email ||
+        "",
       address: buildAddress(
         customer.deliveryAddress,
         customer.shippingAddress,
@@ -551,37 +557,51 @@ function drawHeader(doc, data, logoPath) {
     });
   }
 
+  drawLocationIcon(doc, 205, 38, 13);
   drawText(
     doc,
     "No 3/270 H6, Near Sankari Mahal,\nOpp A.J. Polytechnic College, Sattur Road, Sivakasi.",
-    205,
+    226,
     36,
-    260,
+    236,
     {
       fontSize: 10,
       lineGap: 6,
     }
   );
 
+  drawPhoneIcon(doc, 205, 84, 12);
   drawText(
     doc,
-    "sivakasimuthucrackers@gmail.com",
-    205,
-    92,
-    260,
+    "96003 33302  |  70104 00258",
+    226,
+    83,
+    236,
     {
       fontSize: 10,
     }
   );
 
+  drawEmailIcon(doc, 205, 105, 14, 10);
   drawText(
     doc,
-    "sivakasimuthucrackers.com",
-    205,
-    116,
-    260,
+    "sivakasimuthucrackers@gmail.com",
+    226,
+    103,
+    236,
     {
-      fontSize: 10,
+      fontSize: 9.5,
+    }
+  );
+
+  drawText(
+    doc,
+    "www.sivakasimuthucrackers.com",
+    226,
+    124,
+    236,
+    {
+      fontSize: 9.5,
     }
   );
 
@@ -593,9 +613,9 @@ function drawHeader(doc, data, logoPath) {
     95,
     {
       bold: true,
-      fontSize: 11,
+      fontSize: 10.5,
       align: "right",
-      lineGap: 4,
+      lineGap: 5,
     }
   );
 
