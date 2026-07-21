@@ -1,6 +1,7 @@
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import SiteChrome from "@/components/layout/SiteChrome";
+import BlastIntro from "@/components/BlastIntro";
 
 export const metadata = {
   title: "Sivakasi Muthu Crackers",
