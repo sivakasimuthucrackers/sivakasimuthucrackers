@@ -356,40 +356,22 @@ export function getInvoiceData(order) {
         order.mobile ||
         order.phone ||
         "",
-      address: buildAddress(
-        customer.deliveryAddress,
-        customer.shippingAddress,
+
+      email:
+        customer.email ||
+        order.customer?.email ||
+        order.email ||
+        "",
+
+      address: [
         customer.address,
-        customer.fullAddress,
-        customer.addressLine1,
-        customer.addressLine2,
-        customer.area,
-        customer.landmark,
         customer.city,
         customer.district,
         customer.state,
         customer.pincode,
-        customer.pinCode,
-        customer.postalCode,
-        order.deliveryAddress,
-        order.shippingAddress,
-        order.address,
-        order.customerAddress,
-        order.addressLine1,
-        order.addressLine2,
-        order.area,
-        order.landmark,
-        order.city,
-        order.district,
-        order.state,
-        order.pincode,
-        order.pinCode,
-        order.postalCode,
-        order.customer,
-        order.shipping,
-        order.delivery,
-        order.billingAddress
-      ),
+      ]
+        .filter(Boolean)
+        .join(", "),
     },
     items: normalizedItems,
     totalQuantity: normalizedItems.reduce(
