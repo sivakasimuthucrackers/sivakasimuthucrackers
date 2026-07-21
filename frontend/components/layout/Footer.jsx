@@ -13,7 +13,7 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://muthu-crackers-backend.onrender.com";
 
 export default function Footer() {
   const [settings, setSettings] = useState({});
