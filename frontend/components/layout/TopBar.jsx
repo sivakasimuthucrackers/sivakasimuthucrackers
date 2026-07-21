@@ -79,7 +79,7 @@ const socialLinks = [
         <div className="flex items-center gap-3">
           <span className="hidden md:inline">Follow us:</span>
 
-          {socialLinks.map(({ url, icon: Icon, label }) =>)
+          {socialLinks.map(({ url, icon: Icon, label }) => (
               <a
                 key={label}
                 href={url}
