@@ -349,16 +349,28 @@ function drawHeader(doc, data, logoPath) {
   });
 
   drawText(
-    doc,
-    `Contact : ${data.customer.contact || ""}`,
-    38,
-    221,
-    370,
-    {
-      bold: true,
-      fontSize: 10,
-    }
-  );
+  doc,
+  `Contact : ${data.customer.contact || ""}`,
+  38,
+  216,
+  370,
+  {
+    bold: true,
+    fontSize: 10,
+  }
+);
+
+drawText(
+  doc,
+  `Delivery Address : ${data.customer.address || "-"}`,
+  38,
+  234,
+  370,
+  {
+    fontSize: 9,
+    lineGap: 2,
+  }
+);
 
   drawText(
     doc,
