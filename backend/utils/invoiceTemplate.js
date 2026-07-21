@@ -214,6 +214,56 @@ function buildAddress(...values) {
   return parts.join(", ");
 }
 
+
+function findEmail(value, visited = new Set()) {
+  if (value === null || value === undefined) return "";
+
+  if (typeof value === "string") {
+    const match = value.match(
+      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i
+    );
+
+    return match ? match[0] : "";
+  }
+
+  if (typeof value !== "object") return "";
+
+  if (visited.has(value)) return "";
+  visited.add(value);
+
+  const preferredEmailKeys = [
+    "email",
+    "customerEmail",
+    "emailAddress",
+    "mail",
+    "gmail",
+  ];
+
+  for (const key of preferredEmailKeys) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      const found = findEmail(value[key], visited);
+
+      if (found) return found;
+    }
+  }
+
+  for (const [key, nestedValue] of Object.entries(value)) {
+    if (key.toLowerCase().includes("email")) {
+      const found = findEmail(nestedValue, visited);
+
+      if (found) return found;
+    }
+  }
+
+  for (const nestedValue of Object.values(value)) {
+    const found = findEmail(nestedValue, visited);
+
+    if (found) return found;
+  }
+
+  return "";
+}
+
 export function getInvoiceData(order) {
   const customer = order.customer || {};
   const items =
