@@ -136,6 +136,84 @@ export function amountInWords(value) {
   return `${parts.join(" ")} Only`;
 }
 
+
+function buildAddress(...values) {
+  const parts = [];
+  const ignoredKeys = new Set([
+    "_id",
+    "id",
+    "__v",
+    "name",
+    "email",
+    "mobile",
+    "phone",
+    "gstNumber",
+    "createdAt",
+    "updatedAt",
+  ]);
+
+  function addPart(value) {
+    if (value === null || value === undefined || value === "") return;
+
+    if (typeof value === "string" || typeof value === "number") {
+      const cleaned = String(value).trim();
+
+      if (cleaned && cleaned !== "-" && !parts.includes(cleaned)) {
+        parts.push(cleaned);
+      }
+
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach(addPart);
+      return;
+    }
+
+    if (typeof value === "object") {
+      const preferredKeys = [
+        "fullAddress",
+        "deliveryAddress",
+        "shippingAddress",
+        "address",
+        "addressLine1",
+        "addressLine2",
+        "houseNumber",
+        "doorNumber",
+        "street",
+        "road",
+        "area",
+        "locality",
+        "landmark",
+        "post",
+        "city",
+        "district",
+        "state",
+        "pincode",
+        "pinCode",
+        "postalCode",
+        "country",
+      ];
+
+      preferredKeys.forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          addPart(value[key]);
+        }
+      });
+
+      Object.entries(value).forEach(([key, nestedValue]) => {
+        if (!preferredKeys.includes(key) && !ignoredKeys.has(key)) {
+          addPart(nestedValue);
+        }
+      });
+    }
+  }
+
+  values.forEach(addPart);
+
+  return parts.join(", ");
+}
+
 export function getInvoiceData(order) {
   const customer = order.customer || {};
   const items =
@@ -228,12 +306,40 @@ export function getInvoiceData(order) {
         order.mobile ||
         order.phone ||
         "",
-      address:
-        customer.address ||
-        customer.fullAddress ||
-        order.address ||
-        order.deliveryAddress ||
-        "",
+      address: buildAddress(
+        customer.deliveryAddress,
+        customer.shippingAddress,
+        customer.address,
+        customer.fullAddress,
+        customer.addressLine1,
+        customer.addressLine2,
+        customer.area,
+        customer.landmark,
+        customer.city,
+        customer.district,
+        customer.state,
+        customer.pincode,
+        customer.pinCode,
+        customer.postalCode,
+        order.deliveryAddress,
+        order.shippingAddress,
+        order.address,
+        order.customerAddress,
+        order.addressLine1,
+        order.addressLine2,
+        order.area,
+        order.landmark,
+        order.city,
+        order.district,
+        order.state,
+        order.pincode,
+        order.pinCode,
+        order.postalCode,
+        order.customer,
+        order.shipping,
+        order.delivery,
+        order.billingAddress
+      ),
     },
     items: normalizedItems,
     totalQuantity: normalizedItems.reduce(
@@ -332,7 +438,7 @@ function drawHeader(doc, data, logoPath) {
   );
 
   const customerY = 160;
-  const customerH = 100;
+  const customerH = 145;
   const estimateX = 430;
 
   drawCell(doc, PAGE.left, customerY, estimateX - PAGE.left, customerH);
@@ -349,28 +455,39 @@ function drawHeader(doc, data, logoPath) {
   });
 
   drawText(
-  doc,
-  `Contact : ${data.customer.contact || ""}`,
-  38,
-  216,
-  370,
-  {
-    bold: true,
-    fontSize: 10,
-  }
-);
+    doc,
+    `Contact : ${data.customer.contact || ""}`,
+    38,
+    211,
+    370,
+    {
+      bold: true,
+      fontSize: 9.5,
+    }
+  );
 
-drawText(
-  doc,
-  `Delivery Address : ${data.customer.address || "-"}`,
-  38,
-  234,
-  370,
-  {
-    fontSize: 9,
-    lineGap: 2,
-  }
-);
+  drawText(
+    doc,
+    `Email : ${data.customer.email || "-"}`,
+    38,
+    229,
+    370,
+    {
+      fontSize: 9,
+    }
+  );
+
+  drawText(
+    doc,
+    `Delivery Address : ${data.customer.address || "-"}`,
+    38,
+    247,
+    380,
+    {
+      fontSize: 8.5,
+      lineGap: 2,
+    }
+  );
 
   drawText(
     doc,
@@ -389,7 +506,7 @@ drawText(
     fontSize: 10,
   });
 
-  return 260;
+  return 305;
 }
 
 function drawTableHeader(doc, y) {
