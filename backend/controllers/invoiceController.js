@@ -56,8 +56,8 @@ export async function downloadInvoice(req, res) {
     doc.pipe(res);
 
     renderEstimateInvoice(doc, order, {
-      logoPath: path.join(__dirname, "../utils/logo.png"),
-      watermarkPath: path.join(__dirname, "../utils/logo.png"),
+      logoPath: path.join(__dirname, "../uploads/logo.png"),
+      watermarkPath: path.join(__dirname, "../uploads/logo.png"),
     });
 
     doc.end();
