@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import {
   FaClipboardList,
+  FaDownload,
   FaSave,
   FaTrash,
 } from "react-icons/fa";
 
 const API_URL = "https://muthu-crackers-backend.onrender.com/api/orders";
+const INVOICE_API_URL = "https://muthu-crackers-backend.onrender.com/api/invoices";
 
 const orderStatusOptions = [
   "Pending",
@@ -46,6 +48,7 @@ export default function AdminOrdersPage() {
   const [editedOrders, setEditedOrders] = useState({});
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState("");
+  const [downloadingId, setDownloadingId] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -181,6 +184,63 @@ export default function AdminOrdersPage() {
       await loadOrders();
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+
+  async function downloadInvoice(order) {
+    try {
+      setDownloadingId(order._id);
+      setMessage("");
+      setError("");
+
+      const token = localStorage.getItem("muthuAdminToken");
+
+      const response = await fetch(
+        `${INVOICE_API_URL}/${order._id}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        let errorMessage = "Unable to download invoice";
+
+        try {
+          const data = await response.json();
+          errorMessage = data.message || errorMessage;
+        } catch {
+          // The response may not contain JSON.
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const invoiceBlob = await response.blob();
+      const invoiceUrl = window.URL.createObjectURL(invoiceBlob);
+      const link = document.createElement("a");
+
+      const invoiceName =
+        order.invoiceNumber ||
+        order.orderNumber ||
+        `invoice-${order._id.slice(-8)}`;
+
+      link.href = invoiceUrl;
+      link.download = `${invoiceName}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(invoiceUrl);
+
+      setMessage("Invoice downloaded successfully.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDownloadingId("");
     }
   }
 
@@ -388,6 +448,16 @@ export default function AdminOrdersPage() {
       className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-bold hover:bg-blue-700"
     >
       View
+    </button>
+
+    <button
+      type="button"
+      onClick={() => downloadInvoice(order)}
+      disabled={downloadingId === order._id}
+      className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 font-bold hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <FaDownload />
+      {downloadingId === order._id ? "Downloading..." : "Invoice"}
     </button>
 
     <button
