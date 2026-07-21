@@ -473,6 +473,48 @@ function drawEmailIcon(doc, x, y, width = 13, height = 9, color = "#ec0874") {
   doc.restore();
 }
 
+function drawWebsiteIcon(doc, x, y, size = 13, color = "#ec0874") {
+  doc.save();
+  doc.strokeColor(color).lineWidth(1.1);
+
+  doc.circle(x + size / 2, y + size / 2, size / 2).stroke();
+  doc
+    .moveTo(x + size / 2, y)
+    .bezierCurveTo(
+      x + size * 0.28,
+      y + size * 0.22,
+      x + size * 0.28,
+      y + size * 0.78,
+      x + size / 2,
+      y + size
+    )
+    .stroke();
+
+  doc
+    .moveTo(x + size / 2, y)
+    .bezierCurveTo(
+      x + size * 0.72,
+      y + size * 0.22,
+      x + size * 0.72,
+      y + size * 0.78,
+      x + size / 2,
+      y + size
+    )
+    .stroke();
+
+  doc
+    .moveTo(x, y + size * 0.34)
+    .lineTo(x + size, y + size * 0.34)
+    .stroke();
+
+  doc
+    .moveTo(x, y + size * 0.66)
+    .lineTo(x + size, y + size * 0.66)
+    .stroke();
+
+  doc.restore();
+}
+
 function drawLocationIcon(doc, x, y, size = 12, color = "#ec0874") {
   doc.save();
   doc.strokeColor(color).fillColor(color).lineWidth(1.2);
@@ -594,11 +636,12 @@ function drawHeader(doc, data, logoPath) {
     }
   );
 
+  drawWebsiteIcon(doc, 205, 123, 13);
   drawText(
     doc,
     "www.sivakasimuthucrackers.com",
     226,
-    124,
+    122,
     236,
     {
       fontSize: 9.5,
@@ -628,49 +671,62 @@ function drawHeader(doc, data, logoPath) {
 
   drawText(doc, `To. ${data.customer.name}`, 34, 171, 380, {
     bold: true,
-    fontSize: 10,
+    fontSize: 10.5,
   });
 
-  drawText(doc, data.customer.place, 38, 199, 370, {
-    bold: true,
-    fontSize: 11,
+  drawPhoneIcon(doc, 38, 205, 11);
+  drawText(doc, "Phone", 58, 203, 58, {
+    fontSize: 9.5,
   });
-
-  drawPhoneIcon(doc, 38, 212, 11);
+  drawText(doc, ":", 116, 203, 10, {
+    fontSize: 9.5,
+  });
   drawText(
     doc,
     data.customer.contact || "-",
-    57,
-    211,
-    350,
+    132,
+    203,
+    270,
     {
       bold: true,
       fontSize: 9.5,
     }
   );
 
-  drawEmailIcon(doc, 38, 230, 13, 9);
+  drawEmailIcon(doc, 38, 225, 13, 9);
+  drawText(doc, "Email", 58, 223, 58, {
+    fontSize: 9.5,
+  });
+  drawText(doc, ":", 116, 223, 10, {
+    fontSize: 9.5,
+  });
   drawText(
     doc,
     data.customer.email || "-",
-    57,
-    228,
-    350,
+    132,
+    223,
+    270,
     {
-      fontSize: 9,
+      fontSize: 9.2,
     }
   );
 
-  drawLocationIcon(doc, 38, 248, 12);
+  drawLocationIcon(doc, 38, 245, 12);
+  drawText(doc, "Address", 58, 243, 58, {
+    fontSize: 9.5,
+  });
+  drawText(doc, ":", 116, 243, 10, {
+    fontSize: 9.5,
+  });
   drawText(
     doc,
     data.customer.address || "-",
-    57,
-    246,
-    350,
+    132,
+    243,
+    275,
     {
-      fontSize: 8.5,
-      lineGap: 2,
+      fontSize: 8.8,
+      lineGap: 3,
     }
   );
 
