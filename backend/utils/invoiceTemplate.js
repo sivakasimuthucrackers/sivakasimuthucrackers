@@ -356,22 +356,40 @@ export function getInvoiceData(order) {
         order.mobile ||
         order.phone ||
         "",
-
-      email:
-        customer.email ||
-        order.customer?.email ||
-        order.email ||
-        "",
-
-      address: [
+      address: buildAddress(
+        customer.deliveryAddress,
+        customer.shippingAddress,
         customer.address,
+        customer.fullAddress,
+        customer.addressLine1,
+        customer.addressLine2,
+        customer.area,
+        customer.landmark,
         customer.city,
         customer.district,
         customer.state,
         customer.pincode,
-      ]
-        .filter(Boolean)
-        .join(", "),
+        customer.pinCode,
+        customer.postalCode,
+        order.deliveryAddress,
+        order.shippingAddress,
+        order.address,
+        order.customerAddress,
+        order.addressLine1,
+        order.addressLine2,
+        order.area,
+        order.landmark,
+        order.city,
+        order.district,
+        order.state,
+        order.pincode,
+        order.pinCode,
+        order.postalCode,
+        order.customer,
+        order.shipping,
+        order.delivery,
+        order.billingAddress
+      ),
     },
     items: normalizedItems,
     totalQuantity: normalizedItems.reduce(
@@ -384,6 +402,118 @@ export function getInvoiceData(order) {
     grandTotal,
     amountWords: amountInWords(grandTotal),
   };
+}
+
+
+function drawPhoneIcon(doc, x, y, size = 11, color = "#ec0874") {
+  doc.save();
+  doc.strokeColor(color).lineWidth(1.6).lineCap("round");
+
+  doc
+    .moveTo(x + size * 0.24, y + size * 0.12)
+    .bezierCurveTo(
+      x + size * 0.05,
+      y + size * 0.25,
+      x + size * 0.18,
+      y + size * 0.62,
+      x + size * 0.48,
+      y + size * 0.82
+    )
+    .bezierCurveTo(
+      x + size * 0.68,
+      y + size * 0.96,
+      x + size * 0.91,
+      y + size * 0.91,
+      x + size * 0.92,
+      y + size * 0.72
+    )
+    .stroke();
+
+  doc
+    .moveTo(x + size * 0.23, y + size * 0.13)
+    .lineTo(x + size * 0.38, y + size * 0.31)
+    .stroke();
+
+  doc
+    .moveTo(x + size * 0.67, y + size * 0.67)
+    .lineTo(x + size * 0.91, y + size * 0.72)
+    .stroke();
+
+  doc.restore();
+}
+
+function drawEmailIcon(doc, x, y, width = 13, height = 9, color = "#ec0874") {
+  doc.save();
+  doc.strokeColor(color).lineWidth(1.2);
+
+  doc.roundedRect(x, y, width, height, 1.2).stroke();
+
+  doc
+    .moveTo(x + 0.8, y + 1)
+    .lineTo(x + width / 2, y + height * 0.58)
+    .lineTo(x + width - 0.8, y + 1)
+    .stroke();
+
+  doc
+    .moveTo(x + 0.8, y + height - 0.8)
+    .lineTo(x + width * 0.37, y + height * 0.45)
+    .stroke();
+
+  doc
+    .moveTo(x + width - 0.8, y + height - 0.8)
+    .lineTo(x + width * 0.63, y + height * 0.45)
+    .stroke();
+
+  doc.restore();
+}
+
+function drawLocationIcon(doc, x, y, size = 12, color = "#ec0874") {
+  doc.save();
+  doc.strokeColor(color).fillColor(color).lineWidth(1.2);
+
+  doc
+    .moveTo(x + size / 2, y + size)
+    .bezierCurveTo(
+      x + size * 0.42,
+      y + size * 0.84,
+      x + size * 0.12,
+      y + size * 0.56,
+      x + size * 0.12,
+      y + size * 0.34
+    )
+    .bezierCurveTo(
+      x + size * 0.12,
+      y + size * 0.08,
+      x + size * 0.32,
+      y,
+      x + size / 2,
+      y
+    )
+    .bezierCurveTo(
+      x + size * 0.68,
+      y,
+      x + size * 0.88,
+      y + size * 0.08,
+      x + size * 0.88,
+      y + size * 0.34
+    )
+    .bezierCurveTo(
+      x + size * 0.88,
+      y + size * 0.56,
+      x + size * 0.58,
+      y + size * 0.84,
+      x + size / 2,
+      y + size
+    )
+    .fill();
+
+  doc.fillColor("#ffffff").circle(
+    x + size / 2,
+    y + size * 0.34,
+    size * 0.13
+  ).fill();
+
+  doc.restore();
 }
 
 function drawHeader(doc, data, logoPath) {
@@ -486,35 +616,38 @@ function drawHeader(doc, data, logoPath) {
     fontSize: 11,
   });
 
+  drawPhoneIcon(doc, 38, 212, 11);
   drawText(
     doc,
-    `Contact : ${data.customer.contact || ""}`,
-    38,
+    data.customer.contact || "-",
+    57,
     211,
-    370,
+    350,
     {
       bold: true,
       fontSize: 9.5,
     }
   );
 
+  drawEmailIcon(doc, 38, 230, 13, 9);
   drawText(
     doc,
-    `Email : ${data.customer.email || "-"}`,
-    38,
-    229,
-    370,
+    data.customer.email || "-",
+    57,
+    228,
+    350,
     {
       fontSize: 9,
     }
   );
 
+  drawLocationIcon(doc, 38, 248, 12);
   drawText(
     doc,
-    `Delivery Address : ${data.customer.address || "-"}`,
-    38,
-    247,
-    380,
+    data.customer.address || "-",
+    57,
+    246,
+    350,
     {
       fontSize: 8.5,
       lineGap: 2,
@@ -523,7 +656,7 @@ function drawHeader(doc, data, logoPath) {
 
   drawText(
     doc,
-    `Estimate No : ${data.estimateNumber}`,
+    "Estimate No :",
     438,
     171,
     126,
@@ -533,9 +666,35 @@ function drawHeader(doc, data, logoPath) {
     }
   );
 
-  drawText(doc, `Date : ${data.date}`, 438, 193, 126, {
+  drawText(
+    doc,
+    data.estimateNumber,
+    438,
+    188,
+    126,
+    {
+      bold: true,
+      fontSize: 10,
+      color: "#ec0874",
+    }
+  );
+
+  doc
+    .moveTo(438, 213)
+    .lineTo(562, 213)
+    .strokeColor("#444444")
+    .lineWidth(0.6)
+    .stroke();
+
+  drawText(doc, "Date :", 438, 226, 126, {
     bold: true,
     fontSize: 10,
+  });
+
+  drawText(doc, data.date, 438, 244, 126, {
+    bold: true,
+    fontSize: 10,
+    color: "#ec0874",
   });
 
   return 305;
