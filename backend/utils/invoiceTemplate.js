@@ -473,6 +473,42 @@ function drawEmailIcon(doc, x, y, width = 13, height = 9, color = "#ec0874") {
   doc.restore();
 }
 
+
+function drawWhatsAppIcon(doc, x, y, size = 13, color = "#22c55e") {
+  doc.save();
+  doc.strokeColor(color).fillColor(color).lineWidth(1.1);
+
+  doc.circle(x + size / 2, y + size / 2, size * 0.43).stroke();
+
+  doc
+    .moveTo(x + size * 0.24, y + size * 0.79)
+    .lineTo(x + size * 0.16, y + size * 0.98)
+    .lineTo(x + size * 0.37, y + size * 0.88)
+    .stroke();
+
+  doc
+    .moveTo(x + size * 0.36, y + size * 0.31)
+    .bezierCurveTo(
+      x + size * 0.28,
+      y + size * 0.42,
+      x + size * 0.43,
+      y + size * 0.68,
+      x + size * 0.65,
+      y + size * 0.73
+    )
+    .bezierCurveTo(
+      x + size * 0.74,
+      y + size * 0.75,
+      x + size * 0.80,
+      y + size * 0.68,
+      x + size * 0.76,
+      y + size * 0.60
+    )
+    .stroke();
+
+  doc.restore();
+}
+
 function drawWebsiteIcon(doc, x, y, size = 13, color = "#ec0874") {
   doc.save();
   doc.strokeColor(color).lineWidth(1.1);
@@ -612,55 +648,48 @@ function drawHeader(doc, data, logoPath) {
     }
   );
 
-  drawPhoneIcon(doc, 205, 84, 12);
-  drawText(
-    doc,
-    "96003 33302  |  70104 00258",
-    226,
-    83,
-    236,
-    {
-      fontSize: 10,
-    }
-  );
-
-  drawEmailIcon(doc, 205, 105, 14, 10);
+  drawEmailIcon(doc, 205, 87, 14, 10);
   drawText(
     doc,
     "sivakasimuthucrackers@gmail.com",
     226,
-    103,
+    85,
     236,
     {
       fontSize: 9.5,
     }
   );
 
-  drawWebsiteIcon(doc, 205, 123, 13);
+  drawWebsiteIcon(doc, 205, 108, 13);
   drawText(
     doc,
     "www.sivakasimuthucrackers.com",
     226,
-    122,
+    107,
     236,
     {
       fontSize: 9.5,
     }
   );
 
-  drawText(
-    doc,
-    "96003 33302\n70104 00258",
-    465,
-    32,
-    95,
-    {
-      bold: true,
-      fontSize: 10.5,
-      align: "right",
-      lineGap: 5,
-    }
-  );
+  drawText(doc, "CONTACT", 468, 38, 92, {
+    bold: true,
+    fontSize: 10,
+    align: "center",
+    color: "#ec0874",
+  });
+
+  drawPhoneIcon(doc, 472, 67, 12);
+  drawText(doc, "96003 33302", 492, 65, 68, {
+    fontSize: 10,
+    align: "left",
+  });
+
+  drawWhatsAppIcon(doc, 472, 92, 13);
+  drawText(doc, "70104 00258", 492, 90, 68, {
+    fontSize: 10,
+    align: "left",
+  });
 
   const customerY = 160;
   const customerH = 145;
@@ -732,7 +761,7 @@ function drawHeader(doc, data, logoPath) {
 
   drawText(
     doc,
-    "Estimate No :",
+    "Invoice No. :",
     438,
     171,
     126,
