@@ -28,3 +28,200 @@ button {
   max-width: 1400px;
   margin: auto;
 }
+
+/* =========================================
+   Blast Intro Animation
+========================================= */
+
+.blast-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(255, 0, 102, 0.28), transparent 42%),
+    radial-gradient(circle at 25% 30%, rgba(255, 174, 0, 0.15), transparent 28%),
+    radial-gradient(circle at 75% 25%, rgba(0, 229, 255, 0.14), transparent 30%),
+    linear-gradient(135deg, #050505, #170017, #000000);
+  animation: blastOverlayFade 0.7s ease 2.1s forwards;
+}
+
+.blast-content {
+  position: relative;
+  z-index: 10;
+  padding: 24px;
+  text-align: center;
+  animation: blastContentZoom 1s ease;
+}
+
+.blast-subtitle {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+}
+
+.blast-content h1 {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.8rem, 9vw, 7rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px #ff0055,
+    0 0 24px #ff0055,
+    0 0 48px #ff7a00;
+}
+
+.blast-content h2 {
+  margin: 10px 0;
+  color: #ffd700;
+  font-size: clamp(1.8rem, 6vw, 4.8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px #ff8c00,
+    0 0 24px #ff0055;
+}
+
+.blast-text {
+  margin: 18px 0 0;
+  color: #ffffff;
+  font-size: clamp(0.85rem, 2vw, 1.25rem);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.firework,
+.firework::before,
+.firework::after {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  content: "";
+  box-shadow:
+    0 -90px #ff0055,
+    64px -64px #ffd500,
+    90px 0 #00e5ff,
+    64px 64px #ff6600,
+    0 90px #ff00ff,
+    -64px 64px #00ff88,
+    -90px 0 #ffffff,
+    -64px -64px #ffcc00;
+  animation: fireworkBlast 1.3s ease-out infinite;
+}
+
+.firework::before {
+  transform: rotate(22.5deg);
+}
+
+.firework::after {
+  transform: rotate(45deg);
+}
+
+.firework1 {
+  top: 28%;
+  left: 20%;
+}
+
+.firework2 {
+  top: 22%;
+  right: 20%;
+  animation-delay: 0.35s;
+}
+
+.firework3 {
+  bottom: 24%;
+  left: 50%;
+  animation-delay: 0.75s;
+}
+
+@keyframes fireworkBlast {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  70% {
+    transform: scale(1.45);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes blastContentZoom {
+  0% {
+    transform: scale(0.35);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blastOverlayFade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .blast-overlay {
+    padding: 20px;
+  }
+
+  .blast-subtitle {
+    letter-spacing: 3px;
+  }
+
+  .blast-text {
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+
+  .firework1 {
+    left: 12%;
+  }
+
+  .firework2 {
+    right: 12%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blast-overlay,
+  .blast-content,
+  .firework,
+  .firework::before,
+  .firework::after {
+    animation: none;
+  }
+
+  .blast-overlay {
+    display: none;
+  }
+}
