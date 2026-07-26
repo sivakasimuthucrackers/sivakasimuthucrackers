@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight, FaTimes } from "react-icons/fa";
 
-const API_URL = "http://localhost:5000/api/gallery";
+const API_URL = "https://muthu-crackers-backend.onrender.com/api/gallery";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
