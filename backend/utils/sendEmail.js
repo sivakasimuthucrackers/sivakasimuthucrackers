@@ -14,12 +14,21 @@ function createTransporter() {
   });
 }
 
-export async function sendEmail({ to, subject, html }) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  attachments = [],
+}) {
   const transporter = createTransporter();
 
   if (!transporter) {
     console.log("Email skipped: EMAIL_USER or EMAIL_PASS missing");
-    return { success: false, skipped: true };
+
+    return {
+      success: false,
+      skipped: true,
+    };
   }
 
   try {
@@ -28,11 +37,19 @@ export async function sendEmail({ to, subject, html }) {
       to,
       subject,
       html,
+      attachments,
     });
 
-    return { success: true, messageId: result.messageId };
+    return {
+      success: true,
+      messageId: result.messageId,
+    };
   } catch (error) {
     console.error("Email sending failed:", error.message);
-    return { success: false, error: error.message };
+
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 }
