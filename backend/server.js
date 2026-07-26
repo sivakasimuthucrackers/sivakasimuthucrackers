@@ -13,8 +13,8 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import enquiryRoutes from "./routes/enquiryRoutes.js";
 import settingRoutes from "./routes/settingRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
-import galleryRoutes from "./routes/galleryRoutes.js";
-import invoiceRoutes from "./routes/invoiceRoutes.js";   // <-- NEW
+import galleryRoutes from "./routes/galleryRoutes.js";   // <-- NEW
+import invoiceRoutes from "./routes/invoiceRoutes.js";
 
 dotenv.config();
 
@@ -36,8 +36,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/enquiries", enquiryRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/banners", bannerRoutes);
-app.use("/api/gallery", galleryRoutes);
-app.use("/api/invoices", invoiceRoutes);   // <-- NEW
+app.use("/api/gallery", galleryRoutes);   // <-- NEW
+app.use("/api/invoices", invoiceRoutes);
 
 app.get("/", (req, res) => {
   res.json({
