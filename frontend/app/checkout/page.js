@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaArrowLeft,
   FaCheckCircle,
@@ -14,7 +14,7 @@ import {
 import { useCart } from "@/context/CartContext";
 
 const WHATSAPP_NUMBER = "917010400258";
-const API_URL = "https://muthu-crackers-backend.onrender.com";
+const API_URL = "http://localhost:5000";
 
 const paymentOptions = [
   {
@@ -62,6 +62,25 @@ export default function CheckoutPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+useEffect(() => {
+  async function loadSettings() {
+    try {
+      const response = await fetch(`${API_URL}/api/settings`);
+      const data = await response.json();
+
+      if (data.success) {
+        setMinimumOrderValue(
+          Number(data.settings.minimumOrderValue || 0)
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  loadSettings();
+}, []);
+const [minimumOrderValue, setMinimumOrderValue] = useState(0);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -80,6 +99,22 @@ export default function CheckoutPage() {
     try {
       setSubmitting(true);
       setError("");
+if (
+  minimumOrderValue > 0 &&
+  Number(cartTotal) < minimumOrderValue
+) {
+  alert(
+    `Minimum order value is ₹${minimumOrderValue}. Please add more products to continue.`
+  );
+
+  setSubmitting(false);
+
+  if (whatsappWindow) {
+    whatsappWindow.close();
+  }
+
+  return;
+}
 
       const orderItems = cartItems.map((item) => ({
         productId: item._id,
@@ -209,11 +244,6 @@ window.location.href = successUrl;
                 Customer and Delivery Details
               </h2>
 
-              {error && (
-                <p className="mt-5 rounded-xl bg-red-600/20 p-4 text-red-400">
-                  {error}
-                </p>
-              )}
 
               <div className="mt-6 grid gap-5 md:grid-cols-2">
                 <input
