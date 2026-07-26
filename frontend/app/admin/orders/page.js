@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import {
   FaClipboardList,
-  FaDownload,
+  FaFilePdf,
   FaSave,
   FaTrash,
 } from "react-icons/fa";
 
-const API_URL = "https://muthu-crackers-backend.onrender.com/api/orders";
-const INVOICE_API_URL = "https://muthu-crackers-backend.onrender.com/api/invoices";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
+
+const API_URL = `${BACKEND_URL}/api/orders`;
 
 const orderStatusOptions = [
   "Pending",
@@ -48,7 +51,6 @@ export default function AdminOrdersPage() {
   const [editedOrders, setEditedOrders] = useState({});
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState("");
-  const [downloadingId, setDownloadingId] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -85,8 +87,10 @@ export default function AdminOrdersPage() {
 
       loadedOrders.forEach((order) => {
         initialEditedOrders[order._id] = {
-          orderStatus: order.orderStatus || "Pending",
-          paymentStatus: order.paymentStatus || "Pending",
+          orderStatus:
+            order.orderStatus || "Pending",
+          paymentStatus:
+            order.paymentStatus || "Pending",
         };
       });
 
@@ -114,7 +118,9 @@ export default function AdminOrdersPage() {
       setMessage("");
       setError("");
 
-      const token = localStorage.getItem("muthuAdminToken");
+      const token =
+        localStorage.getItem("muthuAdminToken");
+
       const statusData = editedOrders[id];
 
       const response = await fetch(
@@ -127,7 +133,8 @@ export default function AdminOrdersPage() {
           },
           body: JSON.stringify({
             orderStatus: statusData.orderStatus,
-            paymentStatus: statusData.paymentStatus,
+            paymentStatus:
+              statusData.paymentStatus,
           }),
         }
       );
@@ -141,7 +148,9 @@ export default function AdminOrdersPage() {
       }
 
       setMessage(
-        `Order ${data.order?.orderNumber || ""} updated successfully.`
+        `Order ${
+          data.order?.orderNumber || ""
+        } updated successfully.`
       );
 
       await loadOrders();
@@ -163,14 +172,18 @@ export default function AdminOrdersPage() {
       setMessage("");
       setError("");
 
-      const token = localStorage.getItem("muthuAdminToken");
+      const token =
+        localStorage.getItem("muthuAdminToken");
 
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -181,67 +194,22 @@ export default function AdminOrdersPage() {
       }
 
       setMessage(data.message);
+
       await loadOrders();
     } catch (err) {
       setError(err.message);
     }
   }
 
+  function downloadInvoice(order) {
+    const invoiceUrl =
+      `${BACKEND_URL}/api/invoices/${order._id}`;
 
-  async function downloadInvoice(order) {
-    try {
-      setDownloadingId(order._id);
-      setMessage("");
-      setError("");
-
-      const token = localStorage.getItem("muthuAdminToken");
-
-      const response = await fetch(
-        `${INVOICE_API_URL}/${order._id}/download`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        let errorMessage = "Unable to download invoice";
-
-        try {
-          const data = await response.json();
-          errorMessage = data.message || errorMessage;
-        } catch {
-          // The response may not contain JSON.
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const invoiceBlob = await response.blob();
-      const invoiceUrl = window.URL.createObjectURL(invoiceBlob);
-      const link = document.createElement("a");
-
-      const invoiceName =
-        order.invoiceNumber ||
-        order.orderNumber ||
-        `invoice-${order._id.slice(-8)}`;
-
-      link.href = invoiceUrl;
-      link.download = `${invoiceName}.pdf`;
-
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(invoiceUrl);
-
-      setMessage("Invoice downloaded successfully.");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setDownloadingId("");
-    }
+    window.open(
+      invoiceUrl,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   return (
@@ -256,7 +224,7 @@ export default function AdminOrdersPage() {
         </h1>
 
         <p className="mt-3 text-gray-400">
-          Update order and payment statuses.
+          Update order and payment statuses and download invoices.
         </p>
       </div>
 
@@ -271,212 +239,164 @@ export default function AdminOrdersPage() {
           {error}
         </p>
       )}
-
       {loading ? (
-        <p className="text-gray-400">
+        <div className="rounded-2xl bg-[#141414] p-12 text-center text-lg">
           Loading orders...
-        </p>
-      ) : orders.length === 0 ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center">
-          <FaClipboardList className="mx-auto text-6xl text-gray-600" />
-
-          <h2 className="mt-5 text-2xl font-black">
-            No Orders Found
-          </h2>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5">
-          <div className="overflow-x-auto">
-            <table className="min-w-[1300px] w-full">
-              <thead className="bg-pink-600 text-left text-white">
+        <div className="overflow-x-auto rounded-2xl border border-gray-800 bg-[#141414]">
+          <table className="min-w-full text-sm">
+            <thead className="bg-[#1d1d1d] text-white">
+              <tr>
+                <th className="px-4 py-4 text-left">Order No</th>
+                <th className="px-4 py-4 text-left">Customer</th>
+                <th className="px-4 py-4 text-left">Phone</th>
+                <th className="px-4 py-4 text-left">Amount</th>
+                <th className="px-4 py-4 text-left">Order Status</th>
+                <th className="px-4 py-4 text-left">Payment</th>
+                <th className="px-4 py-4 text-left">Date</th>
+                <th className="px-4 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {orders.length === 0 ? (
                 <tr>
-                  <th className="px-5 py-4">
-                    Order
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Customer
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Mobile
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Amount
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Payment Method
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Payment Status
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Order Status
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Date
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Actions
-                  </th>
+                  <td
+                    colSpan={8}
+                    className="px-6 py-10 text-center text-gray-400"
+                  >
+                    No Orders Found
+                  </td>
                 </tr>
-              </thead>
+              ) : (
+                orders.map((order) => (
+                  <tr
+                    key={order._id}
+                    className="border-t border-gray-800 hover:bg-[#1d1d1d]"
+                  >
+                    <td className="px-4 py-4 font-bold">
+                      {order.orderNumber ||
+                        order.invoiceNumber ||
+                        order.estimateNumber ||
+                        order._id.slice(-6)}
+                    </td>
 
-              <tbody>
-                {orders.map((order) => {
-                  const edited =
-                    editedOrders[order._id] || {
-                      orderStatus:
-                        order.orderStatus || "Pending",
-                      paymentStatus:
-                        order.paymentStatus || "Pending",
-                    };
+                    <td className="px-4 py-4">
+                      <div className="font-semibold">
+                        {order.customerName}
+                      </div>
 
-                  return (
-                    <tr
-                      key={order._id}
-                      className="border-t border-white/10"
-                    >
-                      <td className="px-5 py-4 font-black">
-  <button
-    type="button"
-    onClick={() =>
-      window.location.href = `/admin/orders/${order._id}`
-    }
-    className="text-pink-400 hover:text-pink-300 hover:underline font-bold"
-  >
-    {order.orderNumber || order._id.slice(-8)}
-  </button>
-</td>
+                      <div className="text-xs text-gray-400">
+                        {order.email}
+                      </div>
+                    </td>
 
-                      <td className="px-5 py-4">
-                        {order.customer?.name ||
-                          "Customer"}
-                      </td>
+                    <td className="px-4 py-4">
+                      {order.phone}
+                    </td>
 
-                      <td className="px-5 py-4">
-                        {order.customer?.mobile || "-"}
-                      </td>
+                    <td className="px-4 py-4 font-bold text-green-400">
+                      {formatCurrency(order.grandTotal)}
+                    </td>
 
-                      <td className="px-5 py-4 font-black text-yellow-400">
-                        {formatCurrency(
-                          order.totalAmount
-                        )}
-                      </td>
+                    <td className="px-4 py-4">
+                      <select
+                        value={
+                          editedOrders[order._id]?.orderStatus ||
+                          "Pending"
+                        }
+                        onChange={(e) =>
+                          handleStatusChange(
+                            order._id,
+                            "orderStatus",
+                            e.target.value
+                          )
+                        }
+                        className="rounded-lg border border-gray-700 bg-black px-3 py-2"
+                      >
+                        {orderStatusOptions.map((status) => (
+                          <option
+                            key={status}
+                            value={status}
+                          >
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
 
-                      <td className="px-5 py-4">
-                        {order.paymentMethod}
-                      </td>
+                    <td className="px-4 py-4">
+                      <select
+                        value={
+                          editedOrders[order._id]
+                            ?.paymentStatus || "Pending"
+                        }
+                        onChange={(e) =>
+                          handleStatusChange(
+                            order._id,
+                            "paymentStatus",
+                            e.target.value
+                          )
+                        }
+                        className="rounded-lg border border-gray-700 bg-black px-3 py-2"
+                      >
+                        {paymentStatusOptions.map((status) => (
+                          <option
+                            key={status}
+                            value={status}
+                          >
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
 
-                      <td className="px-5 py-4">
-                        <select
-                          value={edited.paymentStatus}
-                          onChange={(event) =>
-                            handleStatusChange(
-                              order._id,
-                              "paymentStatus",
-                              event.target.value
-                            )
+                    <td className="px-4 py-4">
+                      {formatDate(order.createdAt)}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() =>
+                            updateOrder(order._id)
                           }
-                          className="w-full rounded-lg border border-white/10 bg-[#151515] px-3 py-2 text-white outline-none focus:border-pink-500"
-                        >
-                          {paymentStatusOptions.map(
-                            (status) => (
-                              <option
-                                key={status}
-                                value={status}
-                              >
-                                {status}
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <select
-                          value={edited.orderStatus}
-                          onChange={(event) =>
-                            handleStatusChange(
-                              order._id,
-                              "orderStatus",
-                              event.target.value
-                            )
+                          disabled={
+                            updatingId === order._id
                           }
-                          className="w-full rounded-lg border border-white/10 bg-[#151515] px-3 py-2 text-white outline-none focus:border-pink-500"
+                          className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white hover:bg-green-700"
                         >
-                          {orderStatusOptions.map(
-                            (status) => (
-                              <option
-                                key={status}
-                                value={status}
-                              >
-                                {status}
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </td>
+                          <FaSave />
+                          Update
+                        </button>
 
-                      <td className="px-5 py-4 text-gray-400">
-                        {formatDate(order.createdAt)}
-                      </td>
-<td className="px-5 py-4">
-  <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            downloadInvoice(order)
+                          }
+                          className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-white hover:bg-red-700"
+                        >
+                          <FaFilePdf />
+                          PDF
+                        </button>
 
-    <button
-      type="button"
-      onClick={() => updateOrder(order._id)}
-      disabled={updatingId === order._id}
-      className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-bold hover:bg-green-700 disabled:opacity-60"
-    >
-      <FaSave />
-      {updatingId === order._id ? "Saving..." : "Update"}
-    </button>
-
-    <button
-      type="button"
-      onClick={() =>
-        window.location.href = `/admin/orders/${order._id}`
-      }
-      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-bold hover:bg-blue-700"
-    >
-      View
-    </button>
-
-    <button
-      type="button"
-      onClick={() => downloadInvoice(order)}
-      disabled={downloadingId === order._id}
-      className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 font-bold hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      <FaDownload />
-      {downloadingId === order._id ? "Downloading..." : "Invoice"}
-    </button>
-
-    <button
-      type="button"
-      onClick={() => deleteOrder(order._id)}
-      className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 font-bold hover:bg-red-700"
-    >
-      <FaTrash />
-      Delete
-    </button>
-
-  </div>
-</td> 
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <button
+                          onClick={() =>
+                            deleteOrder(order._id)
+                          }
+                          className="flex items-center gap-2 rounded-lg bg-gray-700 px-3 py-2 text-white hover:bg-gray-800"
+                        >
+                          <FaTrash />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </main>
