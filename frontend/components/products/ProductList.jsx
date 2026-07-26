@@ -5,9 +5,7 @@ import { FaFilter, FaSearch, FaSortAmountDown, FaTimes } from "react-icons/fa";
 import ProductCard from "./ProductCard";
 import MobileCartBar from "./MobileCartBar";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://muthu-crackers-backend.onrender.com";
+const API_URL = "https://muthu-crackers-backend.onrender.com";
 
 const ITEMS_PER_PAGE = 12;
 
