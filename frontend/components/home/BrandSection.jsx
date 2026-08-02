@@ -2,17 +2,17 @@ export default function BrandSection() {
   const brands = [
     {
       name: "Vadi Vel",
-      image: "/images/brands/vadivel.png",
+      image: "/images/brands/Vadivel.png",
       imageClass: "max-h-12",
     },
     {
       name: "Star Vel",
-      image: "/images/brands/starvel.png",
+      image: "/images/brands/StarVel.png",
       imageClass: "max-h-12",
     },
     {
       name: "Wow Star",
-      image: "/images/brands/wowstar.png",
+      image: "/images/brands/Wowstar.png",
       imageClass: "max-h-12",
     },
     {
