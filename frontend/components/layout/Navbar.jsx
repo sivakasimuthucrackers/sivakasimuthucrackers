@@ -29,7 +29,7 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-pink-500/20 bg-black/95 backdrop-blur">
-      <div className="container flex min-h-16 items-center justify-between gap-2 py-2 md:min-h-20 md:gap-4">
+      <div className="container flex min-h-14 items-center justify-between gap-2 py-1 md:min-h-18 md:gap-4">
         <div className="min-w-0 shrink">
           <Logo />
         </div>
@@ -50,7 +50,7 @@ export default function Navbar() {
           <Link
             href="/products"
             aria-label="Search products"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-base transition hover:border-pink-500 hover:text-pink-500 md:h-12 md:w-12"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-sm transition hover:border-pink-500 hover:text-pink-500 md:h-11 md:w-11"
           >
             <FaSearch />
           </Link>
@@ -90,7 +90,7 @@ export default function Navbar() {
             aria-label="Toggle navigation menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((current) => !current)}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 text-lg transition hover:border-pink-500 hover:text-pink-500 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 text-base transition hover:border-pink-500 hover:text-pink-500 lg:hidden"
           >
             {menuOpen ? <FaTimes /> : <FaBars />}
           </button>
