@@ -31,7 +31,11 @@ const paymentOptions = [
 ];
 
 export default function CheckoutPage() {
-  const { cartItems, cartTotal } = useCart();
+  const {
+  cartItems,
+  cartTotal,
+  clearCart,
+} = useCart();
 
   const [settings, setSettings] = useState({
     minimumOrderValue: 3000,
@@ -200,6 +204,7 @@ export default function CheckoutPage() {
       }
 
       setSuccessOrder(data.order);
+clearCart();
 
       if (data.whatsappUrl) {
         window.setTimeout(() => {
