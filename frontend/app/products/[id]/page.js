@@ -157,7 +157,7 @@ Please confirm availability and delivery details.`
     product.isActive && Number(product.stockQuantity || 0) > 0;
 
   return (
-    <main className="min-h-screen bg-[#080808] py-12 md:py-16">
+    <main className="min-h-screen bg-[#080808] py-7 md:py-16">
       <div className="container">
         <Link
           href="/products"
@@ -167,18 +167,18 @@ Please confirm availability and delivery details.`
           Back to Products
         </Link>
 
-        <section className="grid gap-10 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl md:p-8 lg:grid-cols-2">
+        <section className="grid gap-6 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-2xl md:gap-10 md:rounded-3xl md:p-8 lg:grid-cols-2">
           <div>
             <button
               type="button"
               onClick={() => product.image && setImageZoom(true)}
-              className="relative flex min-h-[420px] w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-pink-950 via-black to-orange-950"
+              className="relative flex h-[250px] w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-pink-950 via-black to-orange-950 md:h-auto md:min-h-[420px] md:rounded-3xl"
             >
               {product.image ? (
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="max-h-[470px] w-full object-contain p-6 transition duration-300 hover:scale-110"
+                  className="h-full w-full object-contain p-4 transition duration-300 hover:scale-105 md:max-h-[470px] md:p-6"
                 />
               ) : (
                 <span className="text-9xl">🎆</span>
@@ -195,8 +195,8 @@ Please confirm availability and delivery details.`
               )}
             </button>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-center">
+            <div className="mt-3 grid grid-cols-3 gap-2 md:mt-5 md:gap-4">
+              <div className="rounded-xl border border-white/10 bg-black/30 p-2.5 text-center md:rounded-2xl md:p-4">
                 <FaShieldAlt className="mx-auto text-2xl text-pink-500" />
                 <p className="mt-2 text-sm font-bold">
                   Quality Assured
@@ -224,7 +224,7 @@ Please confirm availability and delivery details.`
               {product.category}
             </p>
 
-            <h1 className="mt-4 text-4xl font-black leading-tight md:text-5xl">
+            <h1 className="mt-2 text-2xl font-black leading-tight md:mt-4 md:text-5xl">
               {product.name}
             </h1>
 
@@ -244,8 +244,8 @@ Please confirm availability and delivery details.`
               </p>
             </div>
 
-            <div className="mt-7 flex flex-wrap items-end gap-4">
-              <span className="text-4xl font-black text-yellow-400">
+            <div className="mt-4 flex flex-wrap items-end gap-3 md:mt-7 md:gap-4">
+              <span className="text-3xl font-black text-yellow-400 md:text-4xl">
                 ₹{offerPrice.toLocaleString("en-IN")}
               </span>
 
@@ -273,7 +273,7 @@ Please confirm availability and delivery details.`
                 : "Currently Unavailable"}
             </div>
 
-            <div className="mt-8 rounded-2xl border border-white/10 bg-black/30 p-5">
+            <div className="mt-5 rounded-xl border border-white/10 bg-black/30 p-4 md:mt-8 md:rounded-2xl md:p-5">
               <h2 className="text-xl font-black">
                 Product Description
               </h2>
@@ -284,8 +284,8 @@ Please confirm availability and delivery details.`
               </p>
             </div>
 
-            <div className="mt-7">
-              <p className="mb-3 font-bold">Select Quantity</p>
+            <div className="mt-5 flex items-center justify-between gap-4 md:mt-7 md:block">
+              <p className="font-bold md:mb-3">Quantity</p>
 
               <div className="flex w-fit items-center rounded-xl border border-white/10 bg-black/40">
                 <button
@@ -312,26 +312,26 @@ Please confirm availability and delivery details.`
               </div>
             </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={addSelectedQuantityToCart}
-                disabled={!isInStock}
-                className="flex items-center justify-center gap-3 rounded-xl bg-pink-600 px-6 py-4 text-lg font-black transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <FaShoppingCart />
-                Add to Cart
-              </button>
+<div className="mt-5 grid grid-cols-2 gap-3 md:mt-8 md:gap-4">
+  <button
+    type="button"
+    onClick={addSelectedQuantityToCart}
+    disabled={!isInStock}
+    className="flex items-center justify-center gap-2 rounded-xl bg-pink-600 px-3 py-3.5 text-sm font-black transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50 md:gap-3 md:px-6 md:py-4 md:text-lg"
+  >
+    <FaShoppingCart />
+    Add to Cart
+  </button>
 
-              <button
-                type="button"
-                onClick={handleBuyNow}
-                disabled={!isInStock}
-                className="rounded-xl bg-yellow-400 px-6 py-4 text-lg font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Buy Now
-              </button>
-            </div>
+  <button
+    type="button"
+    onClick={handleBuyNow}
+    disabled={!isInStock}
+    className="rounded-xl bg-yellow-400 px-3 py-3.5 text-sm font-black text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50 md:px-6 md:py-4 md:text-lg"
+  >
+    Buy Now
+  </button>
+</div>
 
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${createWhatsAppMessage()}`}
