@@ -1,205 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  FaArrowLeft,
-  FaCheckCircle,
-  FaCreditCard,
-  FaUniversity,
-  FaWhatsapp,
-  FaWallet,
-} from "react-icons/fa";
-
+import { useState } from "react";
+import { FaArrowLeft, FaWhatsapp, FaWallet, FaCheckCircle } from "react-icons/fa";
 import { useCart } from "@/context/CartContext";
 
-const WHATSAPP_NUMBER = "917010400258";
-const API_URL = "https://muthu-crackers-backend.onrender.com";
-
 const paymentOptions = [
-  {
-    value: "UPI",
-    label: "UPI / QR Code",
-    description: "Payment details will be confirmed on WhatsApp.",
-    icon: FaWallet,
-  },
-  {
-    value: "Bank Transfer",
-    label: "Bank Transfer",
-    description: "Bank account details will be shared after confirmation.",
-    icon: FaUniversity,
-  },
-  {
-    value: "Cash on Delivery",
-    label: "Cash on Delivery Request",
-    description: "Availability depends on location and order value.",
-    icon: FaCreditCard,
-  },
-  {
-    value: "WhatsApp Confirmation",
-    label: "Confirm on WhatsApp",
-    description: "Discuss payment and delivery directly with our team.",
-    icon: FaWhatsapp,
-  },
+  { value: "UPI", label: "PhonePe / Google Pay", description: "Scan QR or pay to 7010400258", icon: FaWallet },
+  { value: "WhatsApp Confirmation", label: "Confirm on WhatsApp", description: "Send payment screenshot on WhatsApp", icon: FaWhatsapp },
 ];
 
 export default function CheckoutPage() {
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal } = useCart();
 
   const [form, setForm] = useState({
     name: "",
     mobile: "",
-    email: "",
     address: "",
     city: "",
     district: "",
-    state: "Tamil Nadu",
     pincode: "",
-    gstNumber: "",
-    paymentMethod: "WhatsApp Confirmation",
+    paymentMethod: "UPI",
     notes: "",
   });
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-useEffect(() => {
-  async function loadSettings() {
-    try {
-      const response = await fetch(`${API_URL}/api/settings`);
-      const data = await response.json();
-
-      if (data.success) {
-        setMinimumOrderValue(
-          Number(data.settings.minimumOrderValue || 0)
-        );
-      }
-    } catch (err) {
-      console.log(err);
-    }
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
   }
 
-  loadSettings();
-}, []);
-const [minimumOrderValue, setMinimumOrderValue] = useState(0);
-
-  function handleChange(event) {
-    const { name, value } = event.target;
-
-    setForm((currentForm) => ({
-      ...currentForm,
-      [name]: value,
-    }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    const whatsappWindow = window.open("", "_blank");
-
-    try {
-      setSubmitting(true);
-      setError("");
-if (
-  minimumOrderValue > 0 &&
-  Number(cartTotal) < minimumOrderValue
-) {
-  alert(
-    `Minimum order value is ₹${minimumOrderValue}. Please add more products to continue.`
-  );
-
-  setSubmitting(false);
-
-  if (whatsappWindow) {
-    whatsappWindow.close();
-  }
-
-  return;
-}
-
-      const orderItems = cartItems.map((item) => ({
-        productId: item._id,
-        name: item.name,
-        offerPrice: Number(item.offerPrice),
-        quantity: item.quantity,
-        subtotal: Number(item.offerPrice) * item.quantity,
-      }));
-
-      const response = await fetch(`${API_URL}/api/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customer: {
-            name: form.name,
-            mobile: form.mobile,
-            email: form.email,
-            address: form.address,
-            city: form.city,
-            district: form.district,
-            state: form.state,
-            pincode: form.pincode,
-            gstNumber: form.gstNumber,
-          },
-          items: orderItems,
-          totalAmount: Number(cartTotal),
-          paymentMethod: form.paymentMethod,
-          notes: form.notes,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to create order");
-      }
-const orderNumber =
-  data.order?.orderNumber || data.order?._id || "Not generated";
-
-const whatsappUrl =
-  data.whatsappUrl ||
-  `https://wa.me/${WHATSAPP_NUMBER}`;
-
-const successUrl = `/order-success?orderNumber=${encodeURIComponent(
-  orderNumber
-)}`;
-
-clearCart();
-
-if (whatsappWindow) {
-  whatsappWindow.location.href = whatsappUrl;
-}
-
-window.location.href = successUrl;
-    } catch (err) {
-      if (whatsappWindow) {
-        whatsappWindow.close();
-      }
-
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
+  function handleSubmit(e) {
+    e.preventDefault();
+    const msg = encodeURIComponent(
+      `New Order\nName: ${form.name}\nMobile: ${form.mobile}\nCity: ${form.city}\nDistrict: ${form.district}\nPincode: ${form.pincode}\nPayment: ${form.paymentMethod}\nTotal: ₹${cartTotal}`
+    );
+    window.open(`https://wa.me/917010400258?text=${msg}`, "_blank");
   }
 
   if (cartItems.length === 0) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#080808] px-5 py-20">
+      <main className="flex min-h-screen items-center justify-center bg-[#080808] px-5 py-16">
         <div className="text-center">
-          <FaCheckCircle className="mx-auto text-7xl text-pink-500" />
-
-          <h1 className="mt-6 text-4xl font-black">
-            Your Cart is Empty
-          </h1>
-
-          <p className="mt-3 text-gray-400">
-            Add products before opening checkout.
-          </p>
-
-          <Link
-            href="/products"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-pink-600 px-7 py-4 font-black"
-          >
+          <FaCheckCircle className="mx-auto text-6xl text-pink-500" />
+          <h1 className="mt-5 text-3xl font-black">Your Cart is Empty</h1>
+          <p className="mt-2 text-gray-400">Add products before checkout.</p>
+          <Link href="/products" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-pink-600 px-6 py-3 font-black">
             <FaArrowLeft />
             Shop Products
           </Link>
@@ -209,254 +54,110 @@ window.location.href = successUrl;
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] py-12 md:py-16">
-      <div className="container">
-        <Link
-          href="/cart"
-          className="mb-8 inline-flex items-center gap-2 font-bold text-pink-500"
-        >
+    <main className="min-h-screen bg-[#080808] py-5">
+      <div className="container max-w-6xl">
+        <Link href="/cart" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-pink-500">
           <FaArrowLeft />
           Back to Cart
         </Link>
 
-        <div className="mb-10">
-          <p className="font-bold uppercase tracking-[4px] text-pink-500">
-            Complete Your Order
-          </p>
-
-          <h1 className="mt-2 text-4xl font-black md:text-5xl">
-            Checkout
-          </h1>
-
-          <p className="mt-3 text-gray-400">
-            Enter your delivery details and choose your preferred payment
-            method.
-          </p>
+        <div className="mb-6">
+          <p className="text-xs font-bold uppercase tracking-[3px] text-pink-500">Complete your order</p>
+          <h1 className="mt-2 text-3xl font-black">Checkout</h1>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid gap-8 xl:grid-cols-[1fr_400px]"
-        >
-          <div className="space-y-8">
-            <section className="rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
-              <h2 className="text-2xl font-black">
-                Customer and Delivery Details
-              </h2>
+        <form onSubmit={handleSubmit} className="grid gap-6 xl:grid-cols-[1fr_340px]">
+          <div className="space-y-6">
+            <section className="rounded-2xl border border-white/10 bg-white/5 p-4 md:p-6">
+              <h2 className="text-xl font-black">Customer & Delivery Details</h2>
 
-
-              <div className="mt-6 grid gap-5 md:grid-cols-2">
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="tel"
-                  name="mobile"
-                  placeholder="10-digit Mobile Number"
-                  value={form.mobile}
-                  onChange={handleChange}
-                  required
-                  pattern="[0-9]{10}"
-                  maxLength="10"
-                  inputMode="numeric"
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address (Optional)"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={form.city}
-                  onChange={handleChange}
-                  required
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="text"
-                  name="district"
-                  placeholder="District"
-                  value={form.district}
-                  onChange={handleChange}
-                  required
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="text"
-                  name="state"
-                  placeholder="State"
-                  value={form.state}
-                  onChange={handleChange}
-                  required
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="text"
-                  name="pincode"
-                  placeholder="6-digit Pincode"
-                  value={form.pincode}
-                  onChange={handleChange}
-                  required
-                  pattern="[0-9]{6}"
-                  maxLength="6"
-                  inputMode="numeric"
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-                />
-
-                <input
-                  type="text"
-                  name="gstNumber"
-                  placeholder="Customer GST Number (Optional)"
-                  value={form.gstNumber}
-                  onChange={handleChange}
-                  className="rounded-xl border border-white/10 bg-black/40 px-4 py-4 uppercase outline-none focus:border-pink-500"
-                />
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <input name="name" placeholder="Full Name" value={form.name} onChange={handleChange}
+                  className="rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
+                <input name="mobile" placeholder="Mobile Number" value={form.mobile} onChange={handleChange}
+                  className="rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
+                <input name="city" placeholder="City" value={form.city} onChange={handleChange}
+                  className="rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
+                <input name="district" placeholder="District" value={form.district} onChange={handleChange}
+                  className="rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
+                <input name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange}
+                  className="rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500 md:col-span-2" />
               </div>
 
-              <textarea
-                name="address"
-                placeholder="Complete Delivery Address"
-                value={form.address}
-                onChange={handleChange}
-                required
-                rows="5"
-                className="mt-5 w-full rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-              />
+              <textarea name="address" placeholder="Complete Delivery Address" value={form.address} onChange={handleChange}
+                rows="3" className="mt-4 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
 
-              <textarea
-                name="notes"
-                placeholder="Order Notes (Optional)"
-                value={form.notes}
-                onChange={handleChange}
-                rows="3"
-                className="mt-5 w-full rounded-xl border border-white/10 bg-black/40 px-4 py-4 outline-none focus:border-pink-500"
-              />
+              <textarea name="notes" placeholder="Order Notes (Optional)" value={form.notes} onChange={handleChange}
+                rows="2" className="mt-4 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-3 text-sm outline-none focus:border-pink-500" />
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8">
-              <h2 className="text-2xl font-black">
-                Payment Preference
-              </h2>
+            <section className="rounded-2xl border border-white/10 bg-white/5 p-4 md:p-6">
+              <h2 className="text-xl font-black">Payment Method</h2>
+              <div className="mt-4 grid gap-3">
+                {paymentOptions.map(({ value, label, description, icon: Icon }) => (
+                  <label key={value} className={`cursor-pointer rounded-xl border p-4 ${form.paymentMethod === value ? "border-pink-500 bg-pink-500/10" : "border-white/10 bg-black/20"}`}>
+                    <input type="radio" name="paymentMethod" value={value} checked={form.paymentMethod === value}
+                      onChange={handleChange} className="sr-only" />
+                    <div className="flex items-start gap-3">
+                      <Icon className="mt-1 text-xl text-pink-500" />
+                      <div>
+                        <h3 className="font-bold">{label}</h3>
+                        <p className="mt-1 text-sm text-gray-400">{description}</p>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
 
-              <p className="mt-2 text-sm text-gray-400">
-                This website records your preference. Final payment details
-                are confirmed after stock and delivery verification.
-              </p>
-
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {paymentOptions.map(
-                  ({
-                    value,
-                    label,
-                    description,
-                    icon: Icon,
-                  }) => (
-                    <label
-                      key={value}
-                      className={`cursor-pointer rounded-2xl border p-5 transition ${
-                        form.paymentMethod === value
-                          ? "border-pink-500 bg-pink-500/10"
-                          : "border-white/10 bg-black/20 hover:border-pink-500/50"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value={value}
-                        checked={form.paymentMethod === value}
-                        onChange={handleChange}
-                        className="sr-only"
-                      />
-
-                      <Icon className="text-2xl text-pink-500" />
-
-                      <h3 className="mt-3 font-black">{label}</h3>
-
-                      <p className="mt-2 text-sm leading-6 text-gray-400">
-                        {description}
-                      </p>
-                    </label>
-                  )
-                )}
+              <div className="mt-5 rounded-xl border border-white/10 bg-black/20 p-4">
+                <h3 className="text-lg font-black text-white">Scan & Pay</h3>
+                <div className="mt-3 flex justify-center">
+                  <img src="/images/phonepe-qr.jpg" alt="PhonePe QR Code"
+                    className="w-full max-w-[220px] rounded-lg bg-white p-2" />
+                </div>
+                <div className="mt-4 rounded-lg border border-pink-500/20 bg-pink-500/10 p-3 text-center">
+                  <p className="text-xs text-gray-300">Google Pay Number</p>
+                  <p className="mt-1 text-lg font-black text-yellow-400">7010400258</p>
+                </div>
               </div>
             </section>
           </div>
 
-          <aside className="h-fit rounded-3xl border border-pink-500/20 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-xl xl:sticky xl:top-28">
-            <h2 className="text-2xl font-black">Order Summary</h2>
+          <aside className="h-fit rounded-2xl border border-pink-500/20 bg-gradient-to-b from-white/10 to-white/5 p-4 shadow-xl">
+            <h2 className="text-xl font-black">Order Summary</h2>
 
-            <div className="mt-6 max-h-[420px] space-y-4 overflow-y-auto pr-2">
+            <div className="mt-4 max-h-[320px] space-y-3 overflow-y-auto pr-1">
               {cartItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex justify-between gap-4 border-b border-white/10 pb-4"
-                >
-                  <div>
-                    <p className="font-semibold">{item.name}</p>
-
-                    <p className="mt-1 text-sm text-gray-400">
-                      {item.quantity} × ₹
-                      {Number(item.offerPrice).toLocaleString("en-IN")}
+                <div key={item._id} className="flex justify-between gap-3 border-b border-white/10 pb-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{item.name}</p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      {item.quantity} × ₹{Number(item.offerPrice).toLocaleString("en-IN")}
                     </p>
                   </div>
-
-                  <p className="shrink-0 font-black text-yellow-400">
-                    ₹
-                    {(
-                      Number(item.offerPrice) * item.quantity
-                    ).toLocaleString("en-IN")}
+                  <p className="shrink-0 text-sm font-black text-yellow-400">
+                    ₹{(Number(item.offerPrice) * item.quantity).toLocaleString("en-IN")}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 flex items-end justify-between gap-4">
-              <span className="text-lg font-bold">Cart Total</span>
-
-              <span className="text-3xl font-black text-yellow-400">
+            <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/10 pt-4">
+              <span className="font-bold">Cart Total</span>
+              <span className="text-2xl font-black text-yellow-400">
                 ₹{Number(cartTotal || 0).toLocaleString("en-IN")}
               </span>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm leading-6 text-yellow-200">
-              Shipping charges are confirmed separately based on location,
-              quantity and transport availability.
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl bg-green-500 px-5 py-4 text-lg font-black hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <button type="submit" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-3 text-base font-black">
               <FaWhatsapp />
-
-              {submitting
-                ? "Creating Order..."
-                : "Place Order & Open WhatsApp"}
+              Place Order & Open WhatsApp
             </button>
 
-            <div className="mt-5 space-y-2 text-sm text-gray-400">
+            <div className="mt-4 space-y-1 text-xs text-gray-400">
               <p>Phone: +91 96003 33302</p>
               <p>WhatsApp: +91 70104 00258</p>
-              <p>GSTIN: 33CFNPM5329G3Z9</p>
+              <p>Google Pay: 7010400258</p>
             </div>
           </aside>
         </form>
