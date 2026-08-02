@@ -47,19 +47,19 @@ export default function ProductCard({ product }) {
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-pink-500/20 bg-[#151515] shadow-lg transition duration-300 hover:border-pink-500 md:rounded-3xl md:bg-gradient-to-b md:from-white/10 md:to-white/5 md:hover:-translate-y-2">
-      <div className="flex min-h-[155px] md:hidden">
+      <div className="flex min-h-[120px] md:hidden">
         <Link
           href={productLink}
-          className="relative flex w-[120px] shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-pink-950 via-black to-orange-950"
+          className="relative flex w-[80px] shrink-0 items-center justify-center overflow-hidden bg-gradient-to-br from-pink-950 via-black to-orange-950"
         >
           {product?.image ? (
             <img
               src={product.image}
               alt={product?.name || "Product"}
-              className="h-full w-full object-contain p-3"
+              className="h-full w-full object-contain p-2"
             />
           ) : (
-            <span className="text-5xl">🎆</span>
+            <span className="text-4xl">🎆</span>
           )}
 
           {discount > 0 && (
@@ -99,13 +99,13 @@ export default function ProductCard({ product }) {
             )}
           </div>
 
-          <div className="mt-3 flex items-center gap-2">
-            <div className="flex h-9 items-center rounded-lg border border-white/10 bg-black/40">
-              <button type="button" onClick={decreaseQuantity} aria-label="Decrease quantity" className="flex h-9 w-8 items-center justify-center text-xs transition hover:text-pink-500">
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex h-8 items-center rounded-lg border border-white/10 bg-black/40">
+              <button type="button" onClick={decreaseQuantity} aria-label="Decrease quantity" className="flex h-8 w-8 items-center justify-center text-xs transition hover:text-pink-500">
                 <FaMinus />
               </button>
               <span className="min-w-7 text-center text-sm font-black">{quantity}</span>
-              <button type="button" onClick={increaseQuantity} aria-label="Increase quantity" className="flex h-9 w-8 items-center justify-center text-xs transition hover:text-pink-500">
+              <button type="button" onClick={increaseQuantity} aria-label="Increase quantity" className="flex h-8 w-8 items-center justify-center text-xs transition hover:text-pink-500">
                 <FaPlus />
               </button>
             </div>
@@ -114,11 +114,11 @@ export default function ProductCard({ product }) {
               type="button"
               onClick={handleAddToCart}
               disabled={!isAvailable}
-              className={`flex h-9 flex-1 items-center justify-center gap-2 rounded-lg px-3 text-xs font-black transition ${
+              className={`flex h-8 flex-1 items-center justify-center gap-2 rounded-lg px-3 text-xs font-black transition ${
                 added ? "bg-green-600 text-white" : "bg-pink-600 text-white hover:bg-pink-700"
               } disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400`}
             >
-              {added ? <FaCheck /> : <FaShoppingCart />}
+              {added && <FaCheck />}
               {added ? "Added" : isAvailable ? "Add" : "Out of Stock"}
             </button>
           </div>
