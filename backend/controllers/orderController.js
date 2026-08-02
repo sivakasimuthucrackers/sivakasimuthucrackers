@@ -218,6 +218,58 @@ function createInitialWhatsAppUrl(order) {
   )}`;
 }
 
+
+async function processOrderNotifications(order) {
+  try {
+    const invoiceBuffer = await generateInvoice(order);
+
+    const invoiceAttachment = {
+      filename: `Invoice-${order.orderNumber}.pdf`,
+      content: invoiceBuffer,
+      contentType: "application/pdf",
+    };
+
+    if (order.customer?.email) {
+      const customerResult = await sendEmail({
+        to: order.customer.email,
+        subject: `Order Confirmation - ${order.orderNumber}`,
+        html: createCustomerEmail(order),
+        attachments: [invoiceAttachment],
+      });
+
+      console.log(
+        `Customer order email result for ${order.orderNumber}:`,
+        customerResult
+      );
+    } else {
+      console.log(
+        `Customer email skipped for ${order.orderNumber}: email not provided`
+      );
+    }
+
+    const adminEmail =
+      process.env.ADMIN_EMAIL ||
+      "sivakasimuthucrackers@gmail.com";
+
+    const adminResult = await sendEmail({
+      to: adminEmail,
+      subject: `New Order Received - ${order.orderNumber}`,
+      html: createAdminEmail(order),
+      attachments: [invoiceAttachment],
+    });
+
+    console.log(
+      `Admin order email result for ${order.orderNumber}:`,
+      adminResult
+    );
+  } catch (error) {
+    console.error(
+      `Background order notification failed for ${order.orderNumber}:`,
+      error
+    );
+  }
+}
+
 export const createOrder = async (req, res) => {
   try {
     const orderData = {
@@ -229,7 +281,7 @@ export const createOrder = async (req, res) => {
     const settings = await Setting.findOne();
 
     const minimumOrder =
-      settings?.minimumOrderValue || 0;
+      Number(settings?.minimumOrderValue || 0);
 
     if (Number(req.body.totalAmount) < minimumOrder) {
       return res.status(400).json({
@@ -240,53 +292,28 @@ export const createOrder = async (req, res) => {
 
     const order = await Order.create(orderData);
 
-    const invoiceBuffer = await generateInvoice(order);
-
-    const invoiceAttachment = {
-      filename: `Invoice-${order.orderNumber}.pdf`,
-      content: invoiceBuffer,
-      contentType: "application/pdf",
-    };
-
-    const emailResults = {
-      customer: null,
-      admin: null,
-    };
-
-    if (order.customer.email) {
-      emailResults.customer = await sendEmail({
-        to: order.customer.email,
-        subject: `Order Confirmation - ${order.orderNumber}`,
-        html: createCustomerEmail(order),
-        attachments: [invoiceAttachment],
-      });
-    }
-
-    const adminEmail =
-      process.env.ADMIN_EMAIL ||
-      "sivakasimuthucrackers@gmail.com";
-
-    emailResults.admin = await sendEmail({
-      to: adminEmail,
-      subject: `New Order Received - ${order.orderNumber}`,
-      html: createAdminEmail(order),
-      attachments: [invoiceAttachment],
-    });
-
+    // Return success immediately so checkout does not wait for
+    // invoice generation and email API calls.
     res.status(201).json({
       success: true,
       message: "Order Placed Successfully",
       order,
       whatsappUrl: createInitialWhatsAppUrl(order),
-      emailResults,
+      emailProcessing: true,
     });
+
+    // Continue invoice generation and customer/admin emails
+    // safely in the background.
+    void processOrderNotifications(order);
   } catch (error) {
     console.error("Create order error:", error);
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 };
 
