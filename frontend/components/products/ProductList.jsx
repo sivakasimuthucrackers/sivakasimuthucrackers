@@ -5,7 +5,9 @@ import { FaFilter, FaSearch, FaSortAmountDown, FaTimes } from "react-icons/fa";
 import ProductCard from "./ProductCard";
 import MobileCartBar from "./MobileCartBar";
 
-const API_URL = "https://muthu-crackers-backend.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://muthu-crackers-backend.onrender.com";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -159,36 +161,67 @@ export default function ProductList() {
 
   return (
     <>
-      <section className="mb-8 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6">
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr_auto]">
-          <label className="relative">
-            <FaSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input type="search" placeholder="Search name, code or category..." value={search} onChange={(event) => setSearch(event.target.value)} className="w-full rounded-xl border border-white/10 bg-black/40 py-4 pl-12 pr-5 text-white outline-none transition focus:border-pink-500" />
-          </label>
+      <div className="pb-28 md:pb-0">
+<section className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-2.5 md:p-5">
+  <div className="grid grid-cols-2 gap-2 md:gap-3 lg:grid-cols-[1.4fr_1fr_1fr_auto]">
+    {/* Search */}
+    <label className="relative col-span-2 lg:col-span-1">
+      <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
 
-          <label className="relative">
-            <FaFilter className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-            <select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} className="w-full appearance-none rounded-xl border border-white/10 bg-[#151515] py-4 pl-12 pr-5 text-white outline-none transition focus:border-pink-500">
-              {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-            </select>
-          </label>
+      <input
+        type="search"
+        placeholder="Search products..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        className="h-9 w-full rounded-lg border border-white/10 bg-black/40 pl-10 pr-3 text-sm text-white outline-none transition focus:border-pink-500"
+      />
+    </label>
 
-          <label className="relative">
-            <FaSortAmountDown className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
-            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} className="w-full appearance-none rounded-xl border border-white/10 bg-[#151515] py-4 pl-12 pr-5 text-white outline-none transition focus:border-pink-500">
-              <option value="name-asc">Name: A to Z</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="discount-high">Highest Discount</option>
-              <option value="newest">Newest Products</option>
-            </select>
-          </label>
+    {/* Category */}
+    <label className="relative">
+      <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
 
-          <button type="button" onClick={clearFilters} className="flex items-center justify-center gap-2 rounded-xl border border-pink-500 px-5 py-4 font-black text-pink-500 transition hover:bg-pink-500 hover:text-white">
-            <FaTimes /> Clear
-          </button>
-        </div>
-      </section>
+      <select
+        value={selectedCategory}
+        onChange={(event) => setSelectedCategory(event.target.value)}
+        className="h-9 w-full appearance-none rounded-lg border border-white/10 bg-[#151515] pl-10 pr-3 text-sm text-white outline-none transition focus:border-pink-500"
+      >
+        {categories.map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    {/* Sort */}
+    <label className="relative">
+      <FaSortAmountDown className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+
+      <select
+        value={sortBy}
+        onChange={(event) => setSortBy(event.target.value)}
+        className="h-9 w-full appearance-none rounded-lg border border-white/10 bg-[#151515] pl-10 pr-3 text-sm text-white outline-none transition focus:border-pink-500"
+      >
+        <option value="name-asc">Name: A to Z</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="discount-high">Highest Discount</option>
+        <option value="newest">Newest Products</option>
+      </select>
+    </label>
+
+    {/* Clear Filters */}
+    <button
+      type="button"
+      onClick={clearFilters}
+      className="flex h-9 items-center justify-center gap-1 rounded-lg border border-pink-500 px-3 text-sm font-semibold text-pink-500 transition hover:bg-pink-500 hover:text-white"
+    >
+      <FaTimes />
+      Clear
+    </button>
+  </div>
+</section>
 
       <div ref={productsSectionRef} className="mb-7 flex scroll-mt-28 flex-wrap items-center justify-between gap-3">
         <p className="text-gray-400">Showing <span className="font-black text-white">{visibleProducts.length}</span> of <span className="font-black text-white">{filteredProducts.length}</span> products</p>
@@ -202,27 +235,79 @@ export default function ProductList() {
           <p className="mt-3 text-gray-400">Change the search or clear the selected filters.</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {visibleProducts.map((product) => <ProductCard key={product._id} product={product} />)}
         </div>
       )}
 
       {totalPages > 1 && (
-        <nav className="mt-12 flex flex-wrap justify-center gap-2">
-          <button type="button" onClick={() => changePage(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} className="rounded-xl border border-white/10 px-5 py-3 font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+        <>
+          <nav className="mt-8 flex items-center justify-between gap-3 md:hidden">
+            <button
+              type="button"
+              onClick={() => changePage(Math.max(currentPage - 1, 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
 
-          {Array.from({ length: totalPages }).map((_, index) => {
-            const pageNumber = index + 1;
-            return (
-              <button key={pageNumber} type="button" onClick={() => changePage(pageNumber)} className={`h-12 min-w-12 rounded-xl px-4 font-black transition ${currentPage === pageNumber ? "bg-pink-600 text-white" : "border border-white/10 hover:border-pink-500"}`}>
-                {pageNumber}
-              </button>
-            );
-          })}
+            <span className="text-sm font-bold text-gray-300">
+              Page {currentPage} of {totalPages}
+            </span>
 
-          <button type="button" onClick={() => changePage(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages} className="rounded-xl border border-white/10 px-5 py-3 font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40">Next</button>
-        </nav>
+            <button
+              type="button"
+              onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="rounded-lg border border-white/10 px-4 py-2 text-sm font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </nav>
+
+          <nav className="mt-12 hidden flex-wrap justify-center gap-2 md:flex">
+            <button
+              type="button"
+              onClick={() => changePage(Math.max(currentPage - 1, 1))}
+              disabled={currentPage === 1}
+              className="rounded-xl border border-white/10 px-5 py-3 font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, index) => {
+              const pageNumber = index + 1;
+
+              return (
+                <button
+                  key={pageNumber}
+                  type="button"
+                  onClick={() => changePage(pageNumber)}
+                  className={`h-12 min-w-12 rounded-xl px-4 font-black transition ${
+                    currentPage === pageNumber
+                      ? "bg-pink-600 text-white"
+                      : "border border-white/10 hover:border-pink-500"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="rounded-xl border border-white/10 px-5 py-3 font-bold transition hover:border-pink-500 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </nav>
+        </>
       )}
+
+      </div>
 
       <MobileCartBar />
     </>
