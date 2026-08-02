@@ -9,26 +9,26 @@ function normalizeRecipients(to) {
 }
 
 function normalizeAttachments(attachments = []) {
-  return attachments.map((attachment) => {
-    const normalizedAttachment = {
-      filename: attachment.filename,
-    };
+  return attachments
+    .filter((attachment) => attachment && attachment.filename)
+    .map((attachment) => {
+      const normalized = {
+        filename: attachment.filename,
+      };
 
-    if (attachment.path) {
-      normalizedAttachment.path = attachment.path;
-      return normalizedAttachment;
-    }
+      if (attachment.path) {
+        normalized.path = attachment.path;
+        return normalized;
+      }
 
-    if (attachment.content) {
-      normalizedAttachment.content = Buffer.isBuffer(
-        attachment.content
-      )
-        ? attachment.content.toString("base64")
-        : String(attachment.content);
-    }
+      if (attachment.content !== undefined && attachment.content !== null) {
+        normalized.content = Buffer.isBuffer(attachment.content)
+          ? attachment.content.toString("base64")
+          : String(attachment.content);
+      }
 
-    return normalizedAttachment;
-  });
+      return normalized;
+    });
 }
 
 export async function sendEmail({
@@ -41,24 +41,29 @@ export async function sendEmail({
   const fromEmail = process.env.RESEND_FROM_EMAIL;
 
   if (!apiKey || !fromEmail) {
-    console.error(
-      "Email skipped: RESEND_API_KEY or RESEND_FROM_EMAIL is missing"
-    );
+    const message =
+      "Email skipped: RESEND_API_KEY or RESEND_FROM_EMAIL is missing";
+
+    console.error(message);
 
     return {
       success: false,
       skipped: true,
-      error: "Resend environment variables are missing",
+      error: message,
     };
   }
 
   const recipients = normalizeRecipients(to);
 
   if (recipients.length === 0) {
+    const message = "Email skipped: recipient address is missing";
+
+    console.error(message);
+
     return {
       success: false,
       skipped: true,
-      error: "No recipient email address was provided",
+      error: message,
     };
   }
 
