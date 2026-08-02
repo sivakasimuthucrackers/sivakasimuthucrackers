@@ -11,9 +11,7 @@ import {
   FaTruck,
 } from "react-icons/fa";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://muthu-crackers-backend.onrender.com";
+const API_URL ="https://muthu-crackers-backend.onrender.com";
 
 function StatusIcon({ status }) {
   if (status === "Delivered") {
