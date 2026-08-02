@@ -39,68 +39,87 @@ export default function Testimonials() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden bg-black py-20 text-white">
-      <div className="absolute left-1/2 top-10 h-80 w-80 -translate-x-1/2 rounded-full bg-pink-600/20 blur-3xl" />
+    <section className="relative overflow-hidden bg-black py-10 md:py-20 text-white">
 
-      <div className="container relative z-10 mx-auto px-5">
-        <div className="mx-auto mb-12 max-w-3xl text-center">
-          <p className="font-bold uppercase tracking-[4px] text-pink-500">
+      <div className="absolute left-1/2 top-6 h-48 w-48 -translate-x-1/2 rounded-full bg-pink-600/20 blur-3xl md:h-80 md:w-80" />
+
+      <div className="container relative z-10 mx-auto px-4">
+
+        <div className="mx-auto mb-6 max-w-3xl text-center md:mb-12">
+
+          <p className="text-xs font-bold uppercase tracking-[4px] text-pink-500">
             Customer Feedback
           </p>
-          <h2 className="mt-3 text-3xl font-black md:text-5xl">
-            What Our Customers Say
+
+          <h2 className="mt-2 text-2xl font-black leading-tight md:mt-3 md:text-5xl">
+            What Our
+            <br />
+            Customers Say
           </h2>
+
         </div>
 
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-3xl">
+
           {reviews.map((item, index) => (
+
             <article
               key={`${item.name}-${item.place}`}
-              className={`relative rounded-[32px] border bg-gradient-to-br from-white/10 to-white/5 p-8 text-center shadow-2xl transition duration-700 md:p-12 ${
+              className={`relative rounded-3xl border bg-gradient-to-br from-white/10 to-white/5 p-5 text-center shadow-2xl transition duration-700 md:p-10 ${
                 index === activeIndex
-                  ? "block translate-y-0 border-pink-500 opacity-100"
-                  : "hidden translate-y-4 border-white/10 opacity-0"
+                  ? "block border-pink-500 opacity-100"
+                  : "hidden border-white/10 opacity-0"
               }`}
             >
-              <FaQuoteLeft className="absolute left-8 top-8 text-5xl text-pink-500/20" />
 
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-orange-500 text-3xl font-black shadow-xl">
+              <FaQuoteLeft className="absolute left-5 top-5 text-3xl text-pink-500/20 md:left-8 md:top-8 md:text-5xl" />
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-orange-500 text-2xl font-black shadow-xl md:h-20 md:w-20 md:text-3xl">
                 {item.initial}
               </div>
 
-              <div className="mt-6 flex justify-center gap-1 text-yellow-400">
+              <div className="mt-4 flex justify-center gap-1 text-sm text-yellow-400 md:mt-5 md:text-base">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar key={star} />
                 ))}
               </div>
 
-              <p className="mx-auto mt-7 max-w-2xl text-lg leading-9 text-gray-200 md:text-xl">
+              <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-gray-200 md:mt-7 md:text-xl md:leading-9">
                 “{item.review}”
               </p>
 
-              <div className="mt-7">
-                <h3 className="text-xl font-black">{item.name}</h3>
-                <p className="mt-1 text-sm text-gray-500">{item.place}</p>
+              <div className="mt-5 md:mt-7">
+                <h3 className="text-lg font-black md:text-2xl">
+                  {item.name}
+                </h3>
+
+                <p className="mt-1 text-xs text-gray-500 md:text-sm">
+                  {item.place}
+                </p>
               </div>
+
             </article>
+
           ))}
 
-          <div className="mt-7 flex justify-center gap-3">
+          <div className="mt-5 flex justify-center gap-2 md:mt-7 md:gap-3">
             {reviews.map((item, index) => (
               <button
-                type="button"
                 key={item.name}
-                aria-label={`Show review ${index + 1}`}
+                type="button"
                 onClick={() => setActiveIndex(index)}
-                className={`h-3 rounded-full transition-all duration-300 ${
+                aria-label={`Review ${index + 1}`}
+                className={`rounded-full transition-all duration-300 ${
                   activeIndex === index
-                    ? "w-10 bg-pink-500"
-                    : "w-3 bg-white/20 hover:bg-white/40"
+                    ? "h-2.5 w-8 bg-pink-500"
+                    : "h-2.5 w-2.5 bg-white/20 hover:bg-white/40"
                 }`}
               />
             ))}
           </div>
+
         </div>
+
       </div>
     </section>
   );
