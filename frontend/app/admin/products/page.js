@@ -7,6 +7,7 @@ import {
   FaImage,
   FaPlus,
   FaSave,
+  FaSearch,
   FaTrash,
   FaTimes,
 } from "react-icons/fa";
@@ -45,6 +46,9 @@ export default function AdminProductsPage() {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
 async function loadProducts() {
   try {
@@ -315,6 +319,40 @@ async function loadProducts() {
     }
   }
 
+
+  const categories = Array.from(
+    new Set(
+      products
+        .map((product) => product.category)
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      String(product.name || "").toLowerCase().includes(normalizedSearch) ||
+      String(product.productCode || "")
+        .toLowerCase()
+        .includes(normalizedSearch) ||
+      String(product.category || "")
+        .toLowerCase()
+        .includes(normalizedSearch);
+
+    const matchesCategory =
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  function clearFilters() {
+    setSearchTerm("");
+    setSelectedCategory("All");
+  }
+
   return (
     <main className="min-h-screen bg-[#080808] py-12">
       <div className="container">
@@ -514,12 +552,67 @@ async function loadProducts() {
           </form>
         )}
 
+
+        <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-5">
+          <div className="grid gap-4 lg:grid-cols-[1fr_260px_auto] lg:items-center">
+            <div className="relative">
+              <FaSearch className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by product name, code or category..."
+                className="w-full rounded-xl border border-white/10 bg-black/40 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-pink-500"
+              />
+            </div>
+
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm outline-none transition focus:border-pink-500"
+            >
+              <option value="All">All Categories</option>
+
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+              <p className="text-sm text-gray-400">
+                Showing{" "}
+                <span className="font-black text-white">
+                  {filteredProducts.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-black text-white">
+                  {products.length}
+                </span>{" "}
+                products
+              </p>
+
+              {(searchTerm || selectedCategory !== "All") && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="rounded-lg border border-pink-500/40 px-3 py-2 text-sm font-bold text-pink-400 transition hover:bg-pink-500/10"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
         {loading ? (
           <p className="text-gray-400">Loading products...</p>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-white/10">
             <table className="min-w-full bg-white/5">
-              <thead className="bg-black">
+              <thead className="sticky top-0 z-10 bg-black">
                 <tr>
                   <th className="px-4 py-4 text-left">Image</th>
                   <th className="px-4 py-4 text-left">Code</th>
@@ -533,7 +626,14 @@ async function loadProducts() {
               </thead>
 
               <tbody>
-                {products.map((product) => (
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="px-4 py-12 text-center text-gray-400">
+                      No products found for your search.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map((product) => (
                   <tr
                     key={product._id}
                     className="border-t border-white/10"
@@ -598,7 +698,8 @@ async function loadProducts() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
