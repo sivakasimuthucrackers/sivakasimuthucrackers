@@ -1,29 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaQuoteLeft, FaStar } from "react-icons/fa";
+import {
+  FaCheckCircle,
+  FaExternalLinkAlt,
+  FaGoogle,
+  FaQuoteLeft,
+  FaStar,
+} from "react-icons/fa";
+
+const GOOGLE_REVIEWS_URL =
+  "https://maps.app.goo.gl/PkjgREw9GKr2fRKh6?g_st=ac";
 
 const reviews = [
   {
-    name: "Karthik R.",
-    place: "Coimbatore",
-    initial: "K",
+    name: "Google Customer",
+    place: "Verified Google Review",
+    initial: "G",
     review:
-      "Very good product variety, clear pricing and quick WhatsApp assistance.",
+      "Mr. Karthi offered the best price, and there were lots of collections available.",
   },
   {
-    name: "Priya S.",
-    place: "Madurai",
-    initial: "P",
+    name: "Google Customer",
+    place: "Verified Google Review",
+    initial: "G",
     review:
-      "The catalogue was easy to understand and the order support was helpful.",
+      "Crackers are very good quality and available at very low prices.",
   },
   {
-    name: "Suresh Kumar",
-    place: "Trichy",
-    initial: "S",
+    name: "Google Customer",
+    place: "Verified Google Review",
+    initial: "G",
     review:
-      "Good collection of crackers and family packs at attractive prices.",
+      "Children were very happy, and there was a lot of variety available.",
   },
 ];
 
@@ -33,82 +42,82 @@ export default function Testimonials() {
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveIndex((current) => (current + 1) % reviews.length);
-    }, 4500);
+    }, 6000);
 
     return () => clearInterval(timer);
   }, []);
 
-  return (
-    <section className="relative overflow-hidden bg-black py-10 md:py-20 text-white">
+  const activeReview = reviews[activeIndex];
 
-      <div className="absolute left-1/2 top-6 h-48 w-48 -translate-x-1/2 rounded-full bg-pink-600/20 blur-3xl md:h-80 md:w-80" />
+  return (
+    <section className="relative overflow-hidden bg-black py-9 text-white md:py-16">
+      <div className="absolute left-1/2 top-8 h-48 w-48 -translate-x-1/2 rounded-full bg-pink-600/20 blur-3xl md:h-72 md:w-72" />
 
       <div className="container relative z-10 mx-auto px-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-yellow-400/25 bg-yellow-400/10 px-3 py-1.5 text-xs font-black text-yellow-300">
+            <FaGoogle />
+            5.0 Google Rating
+          </div>
 
-        <div className="mx-auto mb-6 max-w-3xl text-center md:mb-12">
-
-          <p className="text-xs font-bold uppercase tracking-[4px] text-pink-500">
-            Customer Feedback
+          <p className="mt-4 text-xs font-bold uppercase tracking-[4px] text-pink-500">
+            Real Customer Feedback
           </p>
 
-          <h2 className="mt-2 text-2xl font-black leading-tight md:mt-3 md:text-5xl">
-            What Our
-            <br />
-            Customers Say
+          <h2 className="mt-2 text-2xl font-black leading-tight md:text-5xl">
+            Trusted by 57+ Happy Customers
           </h2>
 
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-400 md:text-base">
+            Genuine reviews from our Google Business Profile.
+          </p>
         </div>
 
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto mt-6 max-w-2xl md:mt-9">
+          <article className="relative rounded-2xl border border-pink-500/40 bg-gradient-to-br from-white/10 to-white/5 p-5 shadow-2xl md:rounded-3xl md:p-8">
+            <FaQuoteLeft className="absolute left-4 top-4 text-2xl text-pink-500/20 md:left-6 md:top-6 md:text-4xl" />
 
-          {reviews.map((item, index) => (
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-lg font-black text-blue-500 shadow-lg md:h-14 md:w-14 md:text-xl">
+                  <FaGoogle />
+                </div>
 
-            <article
-              key={`${item.name}-${item.place}`}
-              className={`relative rounded-3xl border bg-gradient-to-br from-white/10 to-white/5 p-5 text-center shadow-2xl transition duration-700 md:p-10 ${
-                index === activeIndex
-                  ? "block border-pink-500 opacity-100"
-                  : "hidden border-white/10 opacity-0"
-              }`}
-            >
+                <div>
+                  <p className="text-sm font-black md:text-base">
+                    {activeReview.name}
+                  </p>
 
-              <FaQuoteLeft className="absolute left-5 top-5 text-3xl text-pink-500/20 md:left-8 md:top-8 md:text-5xl" />
-
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-orange-500 text-2xl font-black shadow-xl md:h-20 md:w-20 md:text-3xl">
-                {item.initial}
+                  <div className="mt-1 flex items-center gap-1 text-[11px] font-bold text-green-400 md:text-xs">
+                    <FaCheckCircle />
+                    {activeReview.place}
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-4 flex justify-center gap-1 text-sm text-yellow-400 md:mt-5 md:text-base">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <FaStar key={star} />
-                ))}
-              </div>
+              <span className="rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-gray-300">
+                Google
+              </span>
+            </div>
 
-              <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-gray-200 md:mt-7 md:text-xl md:leading-9">
-                “{item.review}”
-              </p>
+            <div className="mt-4 flex gap-1 text-sm text-yellow-400 md:mt-5 md:text-base">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar key={star} />
+              ))}
+            </div>
 
-              <div className="mt-5 md:mt-7">
-                <h3 className="text-lg font-black md:text-2xl">
-                  {item.name}
-                </h3>
+            <p className="mt-4 text-base leading-7 text-gray-100 md:text-xl md:leading-9">
+              “{activeReview.review}”
+            </p>
+          </article>
 
-                <p className="mt-1 text-xs text-gray-500 md:text-sm">
-                  {item.place}
-                </p>
-              </div>
-
-            </article>
-
-          ))}
-
-          <div className="mt-5 flex justify-center gap-2 md:mt-7 md:gap-3">
+          <div className="mt-4 flex justify-center gap-2">
             {reviews.map((item, index) => (
               <button
-                key={item.name}
+                key={`${item.review}-${index}`}
                 type="button"
                 onClick={() => setActiveIndex(index)}
-                aria-label={`Review ${index + 1}`}
+                aria-label={`Show review ${index + 1}`}
                 className={`rounded-full transition-all duration-300 ${
                   activeIndex === index
                     ? "h-2.5 w-8 bg-pink-500"
@@ -118,8 +127,28 @@ export default function Testimonials() {
             ))}
           </div>
 
-        </div>
+          <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+            <div className="flex justify-center gap-1 text-sm text-yellow-400">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar key={star} />
+              ))}
+            </div>
 
+            <p className="mt-2 text-sm font-black">
+              5.0 from 57 Google Reviews
+            </p>
+
+            <a
+              href={GOOGLE_REVIEWS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-gray-100"
+            >
+              View All Google Reviews
+              <FaExternalLinkAlt className="text-xs" />
+            </a>
+          </div>
+        </div>
       </div>
     </section>
   );
