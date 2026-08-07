@@ -1,77 +1,110 @@
 import express from "express";
 import multer from "multer";
-import path from "path";
 
+import cloudinary from "../config/cloudinary.js";
 import { protectAdmin } from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, "uploads/");
-  },
-
-  filename: function (req, file, callback) {
-    const extension = path.extname(file.originalname);
-    const safeName = path
-      .basename(file.originalname, extension)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    callback(
-      null,
-      `${Date.now()}-${safeName}${extension.toLowerCase()}`
-    );
-  },
-});
-
-const fileFilter = function (req, file, callback) {
-  const allowedTypes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/webp",
-  ];
-
-  if (allowedTypes.includes(file.mimetype)) {
-    callback(null, true);
-  } else {
-    callback(
-      new Error("Only JPG, JPEG, PNG and WEBP images are allowed"),
-      false
-    );
-  }
-};
+const allowedTypes = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
 const upload = multer({
-  storage,
-  fileFilter,
+  storage: multer.memoryStorage(),
+  fileFilter(req, file, callback) {
+    if (allowedTypes.includes(file.mimetype)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(
+      new Error("Only JPG, JPEG, PNG and WEBP images are allowed")
+    );
+  },
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
 });
 
+function uploadBufferToCloudinary(buffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "muthu-crackers/products",
+        resource_type: "image",
+        use_filename: true,
+        unique_filename: true,
+        overwrite: false,
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+
+        resolve(result);
+      }
+    );
+
+    stream.end(buffer);
+  });
+}
+
 router.post(
   "/product-image",
   protectAdmin,
   upload.single("image"),
-  (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Please select an image",
+        });
+      }
+
+      const result = await uploadBufferToCloudinary(req.file.buffer);
+
+      return res.json({
+        success: true,
+        message: "Image uploaded successfully",
+        imageUrl: result.secure_url,
+        publicId: result.public_id,
+      });
+    } catch (error) {
+      console.error("Cloudinary product image upload failed:", error);
+
+      return res.status(500).json({
         success: false,
-        message: "Please select an image",
+        message: error.message || "Unable to upload product image",
       });
     }
-
-    const imageUrl = `https://muthu-crackers-backend.onrender.com/uploads/${req.file.filename}`;
-
-    res.json({
-      success: true,
-      message: "Image uploaded successfully",
-      imageUrl,
-    });
   }
 );
+
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error.code === "LIMIT_FILE_SIZE"
+          ? "Image size must be 5 MB or less"
+          : error.message,
+    });
+  }
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  next();
+});
 
 export default router;
