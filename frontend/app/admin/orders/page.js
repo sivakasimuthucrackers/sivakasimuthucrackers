@@ -284,20 +284,32 @@ export default function AdminOrdersPage() {
 
                     <td className="px-4 py-4">
                       <div className="font-semibold">
-                        {order.customerName}
+                        {order.customer?.name ||
+                          order.customerName ||
+                          "Customer"}
                       </div>
 
                       <div className="text-xs text-gray-400">
-                        {order.email}
+                        {order.customer?.email ||
+                          order.email ||
+                          ""}
                       </div>
                     </td>
 
                     <td className="px-4 py-4">
-                      {order.phone}
+                      {order.customer?.mobile ||
+                        order.phone ||
+                        order.mobile ||
+                        "-"}
                     </td>
 
                     <td className="px-4 py-4 font-bold text-green-400">
-                      {formatCurrency(order.grandTotal)}
+                      {formatCurrency(
+                        order.totalAmount ??
+                          order.grandTotal ??
+                          order.cartTotal ??
+                          0
+                      )}
                     </td>
 
                     <td className="px-4 py-4">
