@@ -19,7 +19,7 @@ const paymentOptions = [
   {
     value: "UPI",
     label: "PhonePe / Google Pay",
-    description: "Scan QR or pay to 7010400258",
+    description: "Scan QR or pay to 7010400258 or 7871916863",
     icon: FaWallet,
   },
   {
@@ -365,7 +365,7 @@ clearCart();
                 </div>
                 <div className="mt-4 rounded-lg border border-pink-500/20 bg-pink-500/10 p-3 text-center">
                   <p className="text-xs text-gray-300">Google Pay Number</p>
-                  <p className="mt-1 text-lg font-black text-yellow-400">7010400258</p>
+                  <p className="mt-1 text-lg font-black text-yellow-400">7010400258 or 7871916863</p>
                 </div>
               </div>
             </section>
@@ -415,7 +415,7 @@ clearCart();
             <div className="mt-4 space-y-1 text-xs text-gray-400">
               <p>Phone: +91 96003 33302</p>
               <p>WhatsApp: +91 70104 00258</p>
-              <p>Google Pay: 7010400258</p>
+              <p>Google Pay: 7010400258 or 7871916863</p>
             </div>
           </aside>
         </form>
