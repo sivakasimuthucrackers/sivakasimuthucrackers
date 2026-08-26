@@ -63,6 +63,11 @@ export default function AdminDashboardPage() {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [revenueFromDate, setRevenueFromDate] = useState("");
+  const [revenueToDate, setRevenueToDate] = useState("");
+  const [filteredRevenue, setFilteredRevenue] = useState(null);
+  const [filteredOrderCount, setFilteredOrderCount] = useState(0);
+  const [revenueFilterLabel, setRevenueFilterLabel] = useState("All Time");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -169,6 +174,90 @@ export default function AdminDashboardPage() {
     loadDashboard();
   }, [router]);
 
+  function getOrderDateValue(order) {
+    return order.createdAt ? new Date(order.createdAt) : null;
+  }
+
+  function calculateRevenueForRange(orders, fromDate, toDate) {
+    const from = fromDate ? new Date(`${fromDate}T00:00:00`) : null;
+    const to = toDate ? new Date(`${toDate}T23:59:59.999`) : null;
+
+    const matchingOrders = orders.filter((order) => {
+      const orderDate = getOrderDateValue(order);
+      if (!orderDate || Number.isNaN(orderDate.getTime())) return false;
+
+      if (from && orderDate < from) return false;
+      if (to && orderDate > to) return false;
+
+      // Revenue should represent money received.
+      return order.paymentStatus === "Paid";
+    });
+
+    const revenue = matchingOrders.reduce(
+      (sum, order) => sum + Number(order.totalAmount || 0),
+      0
+    );
+
+    return {
+      revenue,
+      orderCount: matchingOrders.length,
+    };
+  }
+
+  async function applyRevenueFilter() {
+    try {
+      setError("");
+
+      if (revenueFromDate && revenueToDate && revenueFromDate > revenueToDate) {
+        setError("From date cannot be after To date.");
+        return;
+      }
+
+      const token = localStorage.getItem("muthuAdminToken");
+      const response = await fetch(`${API_URL}/api/orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to calculate revenue");
+      }
+
+      const result = calculateRevenueForRange(
+        data.orders || [],
+        revenueFromDate,
+        revenueToDate
+      );
+
+      setFilteredRevenue(result.revenue);
+      setFilteredOrderCount(result.orderCount);
+
+      if (revenueFromDate && revenueToDate) {
+        setRevenueFilterLabel(`${revenueFromDate} to ${revenueToDate}`);
+      } else if (revenueFromDate) {
+        setRevenueFilterLabel(`From ${revenueFromDate}`);
+      } else if (revenueToDate) {
+        setRevenueFilterLabel(`Up to ${revenueToDate}`);
+      } else {
+        setRevenueFilterLabel("All Time Paid Revenue");
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  function clearRevenueFilter() {
+    setRevenueFromDate("");
+    setRevenueToDate("");
+    setFilteredRevenue(null);
+    setFilteredOrderCount(0);
+    setRevenueFilterLabel("All Time");
+    setError("");
+  }
+
   const cards = [
     {
       title: "Total Products",
@@ -209,7 +298,9 @@ export default function AdminDashboardPage() {
     {
       title: "Total Revenue",
       value: `₹${Number(
-        dashboard.revenue || 0
+        filteredRevenue !== null
+          ? filteredRevenue
+          : dashboard.revenue || 0
       ).toLocaleString("en-IN")}`,
       icon: FaMoneyBillWave,
       className: "from-rose-600 to-red-900",
@@ -256,6 +347,83 @@ export default function AdminDashboardPage() {
           {error}
         </div>
       )}
+
+      <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-4 md:p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <h2 className="text-lg font-black md:text-xl">
+              Revenue by Date
+            </h2>
+            <p className="mt-1 text-xs text-gray-400 md:text-sm">
+              Filter paid-order revenue for a selected date range.
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:items-end">
+            <label className="text-xs font-bold text-gray-300">
+              From Date
+              <input
+                type="date"
+                value={revenueFromDate}
+                onChange={(e) => setRevenueFromDate(e.target.value)}
+                className="mt-1 block w-full rounded-xl border border-gray-700 bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-pink-500"
+              />
+            </label>
+
+            <label className="text-xs font-bold text-gray-300">
+              To Date
+              <input
+                type="date"
+                value={revenueToDate}
+                onChange={(e) => setRevenueToDate(e.target.value)}
+                className="mt-1 block w-full rounded-xl border border-gray-700 bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-pink-500"
+              />
+            </label>
+
+            <div className="flex gap-2 sm:col-span-2">
+              <button
+                type="button"
+                onClick={applyRevenueFilter}
+                className="flex-1 rounded-xl bg-pink-600 px-4 py-2.5 text-sm font-black text-white hover:bg-pink-700 lg:flex-none"
+              >
+                Apply
+              </button>
+
+              <button
+                type="button"
+                onClick={clearRevenueFilter}
+                className="flex-1 rounded-xl border border-gray-700 bg-black px-4 py-2.5 text-sm font-bold text-gray-300 hover:border-gray-500 lg:flex-none"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {filteredRevenue !== null && (
+          <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-black/30 p-3 md:max-w-md">
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Filtered Revenue
+              </p>
+              <p className="mt-1 text-lg font-black text-green-400">
+                ₹{Number(filteredRevenue).toLocaleString("en-IN")}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] uppercase tracking-wide text-gray-500">
+                Paid Orders
+              </p>
+              <p className="mt-1 text-lg font-black">
+                {filteredOrderCount}
+              </p>
+            </div>
+            <p className="col-span-2 text-xs text-gray-400">
+              {revenueFilterLabel}
+            </p>
+          </div>
+        )}
+      </section>
 
       <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {cards.map(({ title, value, icon: Icon, className }) => (
