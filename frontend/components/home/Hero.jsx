@@ -53,7 +53,7 @@ const slides = [
   },
 ];
 
-const extensions = ["jpg", "jpeg", "png", "webp"];
+const extensions = ["webp", "jpg", "jpeg", "png"];
 
 function HeroImage({ baseName, alt, priority = false }) {
   const [extensionIndex, setExtensionIndex] = useState(0);
@@ -78,6 +78,8 @@ function HeroImage({ baseName, alt, priority = false }) {
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
+          width="1920"
+          height="900"
         />
       ) : (
         <div className="h-full w-full bg-gradient-to-r from-pink-950 via-red-900 to-orange-800" />
@@ -215,19 +217,12 @@ export default function Hero() {
       </button>
 
       <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-        {slides.map((item, index) => (
-          <button
-            type="button"
-            key={item.baseName}
-            aria-label={`Show slide ${index + 1}`}
-            onClick={() => setCurrentSlide(index)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === currentSlide
-                ? "w-8 bg-pink-500"
-                : "w-2 bg-white/45 hover:bg-white/80"
-            }`}
-          />
-        ))}
+        <HeroImage
+        key={slide.baseName}
+        baseName={slide.baseName}
+        alt={slide.highlight}
+        priority={currentSlide === 0}
+      />
       </div>
 
       <style jsx>{`
