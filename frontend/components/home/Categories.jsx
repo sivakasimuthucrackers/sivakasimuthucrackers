@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 
@@ -18,6 +19,21 @@ const categoryIcons = [
   "🎉",
   "🧨",
 ];
+
+function optimizeCategoryImage(url, width) {
+  if (!url) return "";
+
+  // Cloudinary: request a correctly sized modern image.
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace(
+      "/upload/",
+      `/upload/f_auto,q_auto,w_${width},c_fill/`
+    );
+  }
+
+  // Local images are served through Next.js image optimizer below.
+  return url;
+}
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
@@ -111,10 +127,14 @@ export default function Categories() {
                   className="group relative min-h-[190px] min-w-[155px] snap-start overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl"
                 >
                   {category.image ? (
-                    <img
-                      src={category.image}
+                    <Image
+                      src={optimizeCategoryImage(category.image, 360)}
                       alt={category.name}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      fill
+                      sizes="155px"
+                      loading="lazy"
+                      quality={70}
+                      className="object-cover"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-700 via-red-600 to-orange-500">
@@ -153,10 +173,14 @@ export default function Categories() {
                   className="group relative min-h-[300px] overflow-hidden rounded-[30px] border border-white/10 bg-white/5 shadow-2xl transition duration-500 hover:-translate-y-3 hover:border-pink-500/60"
                 >
                   {category.image ? (
-                    <img
-                      src={category.image}
+                    <Image
+                      src={optimizeCategoryImage(category.image, 480)}
                       alt={category.name}
-                      className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                      fill
+                      sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 155px"
+                      loading="lazy"
+                      quality={72}
+                      className="object-cover transition duration-700 group-hover:scale-110"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-700 via-red-600 to-orange-500">
