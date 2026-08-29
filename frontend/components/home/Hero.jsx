@@ -55,7 +55,7 @@ const slides = [
 
 const extensions = ["jpg", "jpeg", "png", "webp"];
 
-function HeroImage({ baseName, alt, active }) {
+function HeroImage({ baseName, alt, priority = false }) {
   const [extensionIndex, setExtensionIndex] = useState(0);
   const [failed, setFailed] = useState(false);
 
@@ -68,22 +68,16 @@ function HeroImage({ baseName, alt, active }) {
   }
 
   return (
-    <div
-      className="absolute inset-0"
-      style={{
-        opacity: active ? 1 : 0,
-        transform: active ? "scale(1)" : "scale(1.04)",
-        transition:
-          "opacity 1s ease-in-out, transform 5s ease-out",
-        zIndex: active ? 1 : 0,
-      }}
-    >
+    <div className="absolute inset-0 z-[1]">
       {!failed ? (
         <img
           src={`/images/hero/${baseName}.${extensions[extensionIndex]}`}
           alt={alt}
           className="h-full w-full object-cover object-center"
           onError={handleError}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding="async"
         />
       ) : (
         <div className="h-full w-full bg-gradient-to-r from-pink-950 via-red-900 to-orange-800" />
@@ -121,14 +115,12 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-[460px] overflow-hidden bg-black text-white sm:min-h-[540px] md:min-h-[590px]">
-      {slides.map((item, index) => (
-        <HeroImage
-          key={item.baseName}
-          baseName={item.baseName}
-          alt={item.highlight}
-          active={index === currentSlide}
-        />
-      ))}
+      <HeroImage
+        key={slide.baseName}
+        baseName={slide.baseName}
+        alt={slide.highlight}
+        priority={currentSlide === 0}
+      />
 
       <div className="absolute inset-0 z-[2] bg-gradient-to-r from-black/90 via-black/65 to-black/20" />
 
