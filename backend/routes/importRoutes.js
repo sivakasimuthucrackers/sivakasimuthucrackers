@@ -7,29 +7,20 @@ import { importProductsFromExcel } from "../controllers/importController.js";
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination(req, file, callback) {
-    callback(null, "uploads/");
-  },
-
-  filename(req, file, callback) {
-    callback(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const fileFilter = (req, file, callback) => {
-  const extension = path.extname(file.originalname).toLowerCase();
-
-  if (extension === ".xlsx" || extension === ".xls") {
-    callback(null, true);
-  } else {
-    callback(new Error("Only Excel files are allowed"), false);
-  }
-};
-
 const upload = multer({
-  storage,
-  fileFilter,
+  storage: multer.memoryStorage(),
+
+  fileFilter(req, file, callback) {
+    const extension = path.extname(file.originalname).toLowerCase();
+
+    if (extension === ".xlsx" || extension === ".xls") {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Only Excel files are allowed"), false);
+  },
+
   limits: {
     fileSize: 10 * 1024 * 1024,
   },
@@ -37,10 +28,12 @@ const upload = multer({
 
 const acceptExcelFile = [
   protectAdmin,
+
   upload.fields([
     { name: "excelFile", maxCount: 1 },
     { name: "file", maxCount: 1 },
   ]),
+
   (req, res, next) => {
     req.file =
       req.files?.excelFile?.[0] ||
@@ -49,10 +42,32 @@ const acceptExcelFile = [
 
     next();
   },
+
   importProductsFromExcel,
 ];
 
 router.post("/", ...acceptExcelFile);
 router.post("/products", ...acceptExcelFile);
+
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error.code === "LIMIT_FILE_SIZE"
+          ? "Excel file size must be 10 MB or less"
+          : error.message,
+    });
+  }
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  next();
+});
 
 export default router;
