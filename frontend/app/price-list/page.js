@@ -10,29 +10,37 @@ import {
 const API_URL = "https://muthu-crackers-backend.onrender.com";
 
 export default function PriceListPage() {
-  const [filePath, setFilePath] = useState(
-    "/downloads/MUTHU_CRACKERS_PRICE_LIST.xlsx"
-  );
+  const [filePath, setFilePath] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadSettings() {
+    async function loadPriceList() {
       try {
-        const response = await fetch(`${API_URL}/api/settings`);
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(`${API_URL}/api/import/price-list`, {
+          cache: "no-store",
+        });
+
         const data = await response.json();
 
-        if (
-          response.ok &&
-          data.settings?.priceListPath &&
-          data.settings.priceListPath !== "/downloads/price-list.pdf"
-        ) {
-          setFilePath(data.settings.priceListPath);
+        if (!response.ok || !data.excelUrl) {
+          throw new Error(data.message || "Price list is not available");
         }
-      } catch {
-        // Keep existing public Excel file.
+
+        // Add a timestamp so the browser/CDN does not reuse an old cached file.
+        const separator = data.excelUrl.includes("?") ? "&" : "?";
+        setFilePath(`${data.excelUrl}${separator}v=${Date.now()}`);
+      } catch (err) {
+        setError(err.message || "Unable to load the latest price list");
+      } finally {
+        setLoading(false);
       }
     }
 
-    loadSettings();
+    loadPriceList();
   }, []);
 
   return (
@@ -54,14 +62,29 @@ export default function PriceListPage() {
             categories, MRP and offer prices.
           </p>
 
+          {error && (
+            <p className="mx-auto mt-6 max-w-xl rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
+              {error}
+            </p>
+          )}
+
           <div className="mt-9 flex flex-wrap justify-center gap-4">
             <a
-              href={filePath}
-              download
-              className="inline-flex items-center gap-3 rounded-xl bg-pink-600 px-8 py-4 font-black text-white hover:bg-pink-700"
+              href={filePath || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-disabled={!filePath}
+              onClick={(event) => {
+                if (!filePath) event.preventDefault();
+              }}
+              className={`inline-flex items-center gap-3 rounded-xl px-8 py-4 font-black text-white ${
+                filePath
+                  ? "bg-pink-600 hover:bg-pink-700"
+                  : "cursor-not-allowed bg-gray-600"
+              }`}
             >
               <FaDownload />
-              Download Price List
+              {loading ? "Loading Price List..." : "Download Price List"}
             </a>
 
             <a
