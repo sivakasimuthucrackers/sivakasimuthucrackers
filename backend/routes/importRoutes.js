@@ -3,7 +3,10 @@ import multer from "multer";
 import path from "path";
 
 import { protectAdmin } from "../middleware/adminAuth.js";
-import { importProductsFromExcel } from "../controllers/importController.js";
+import {
+  importProductsFromExcel,
+  getCurrentPriceList,
+} from "../controllers/importController.js";
 
 const router = express.Router();
 
@@ -45,6 +48,9 @@ const acceptExcelFile = [
 
   importProductsFromExcel,
 ];
+
+// Public route for the main website to get latest Cloudinary Excel URL.
+router.get("/price-list", getCurrentPriceList);
 
 router.post("/", ...acceptExcelFile);
 router.post("/products", ...acceptExcelFile);
