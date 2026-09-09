@@ -20,9 +20,32 @@ const gallerySchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Cloudinary URL for both images and videos
+    mediaUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // Kept for backward compatibility with existing gallery image records
     image: {
       type: String,
-      required: true,
+      default: "",
+      trim: true,
+    },
+
+    // Cloudinary public_id is needed when replacing/deleting media
+    publicId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // "image" or "video"
+    resourceType: {
+      type: String,
+      enum: ["image", "video"],
+      default: "image",
     },
 
     displayOrder: {
