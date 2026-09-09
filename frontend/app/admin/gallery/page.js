@@ -13,6 +13,171 @@ const emptyForm = {
   isActive: true,
 };
 
+const styles = {
+  page: {
+    width: "100%",
+    padding: "24px",
+    color: "#111827",
+    boxSizing: "border-box",
+  },
+  heading: {
+    fontSize: "32px",
+    fontWeight: "700",
+    marginBottom: "24px",
+    color: "#ffffff",
+  },
+  form: {
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "24px",
+    marginBottom: "32px",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+    color: "#111827",
+  },
+  field: {
+    marginBottom: "18px",
+  },
+  label: {
+    display: "block",
+    marginBottom: "8px",
+    color: "#111827",
+    fontWeight: "600",
+    fontSize: "15px",
+  },
+  input: {
+    display: "block",
+    width: "100%",
+    height: "46px",
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    padding: "0 12px",
+    background: "#ffffff",
+    color: "#111827",
+    fontSize: "15px",
+    boxSizing: "border-box",
+    outline: "none",
+  },
+  textarea: {
+    display: "block",
+    width: "100%",
+    minHeight: "90px",
+    maxHeight: "180px",
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    padding: "12px",
+    background: "#ffffff",
+    color: "#111827",
+    fontSize: "15px",
+    boxSizing: "border-box",
+    resize: "vertical",
+    outline: "none",
+  },
+  file: {
+    display: "block",
+    width: "100%",
+    border: "1px solid #d1d5db",
+    borderRadius: "8px",
+    padding: "10px",
+    background: "#ffffff",
+    color: "#111827",
+    boxSizing: "border-box",
+  },
+  help: {
+    color: "#6b7280",
+    fontSize: "13px",
+    marginTop: "7px",
+  },
+  twoCol: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "16px",
+  },
+  previewBox: {
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "12px",
+    maxWidth: "600px",
+    marginBottom: "18px",
+  },
+  previewMedia: {
+    width: "100%",
+    maxHeight: "320px",
+    objectFit: "contain",
+    borderRadius: "8px",
+    background: "#111111",
+  },
+  activeRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "20px",
+    color: "#111827",
+    fontWeight: "600",
+  },
+  buttons: {
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+  },
+  uploadBtn: {
+    background: "#ec007a",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 22px",
+    cursor: "pointer",
+    fontSize: "15px",
+    fontWeight: "600",
+  },
+  resetBtn: {
+    background: "#6b7280",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px 22px",
+    cursor: "pointer",
+    fontSize: "15px",
+    fontWeight: "600",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: "20px",
+  },
+  card: {
+    background: "#ffffff",
+    borderRadius: "14px",
+    overflow: "hidden",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
+    color: "#111827",
+  },
+  cardMedia: {
+    width: "100%",
+    height: "210px",
+    objectFit: "cover",
+    background: "#111111",
+  },
+  cardBody: {
+    padding: "16px",
+  },
+  editBtn: {
+    background: "#2563eb",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "7px",
+    padding: "9px 15px",
+    cursor: "pointer",
+  },
+  deleteBtn: {
+    background: "#dc2626",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "7px",
+    padding: "9px 15px",
+    cursor: "pointer",
+  },
+};
+
 export default function GalleryAdminPage() {
   const [gallery, setGallery] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -53,11 +218,10 @@ export default function GalleryAdminPage() {
       if (response.ok && data.success) {
         setGallery(data.galleryItems || []);
       } else {
-        alert(data.message || "Unable to load gallery");
+        console.error(data.message || "Unable to load gallery");
       }
     } catch (err) {
-      console.error(err);
-      alert("Unable to load gallery");
+      console.error("Gallery load error:", err);
     } finally {
       setLoading(false);
     }
@@ -89,13 +253,13 @@ export default function GalleryAdminPage() {
     const isVideo = file.type.startsWith("video/");
 
     if (!isImage && !isVideo) {
-      alert("Please select an image or video file");
+      alert("Please select an image or video file.");
       e.target.value = "";
       return;
     }
 
     if (file.size > 100 * 1024 * 1024) {
-      alert("File size must be 100 MB or less");
+      alert("File size must be 100 MB or less.");
       e.target.value = "";
       return;
     }
@@ -127,7 +291,7 @@ export default function GalleryAdminPage() {
     e.preventDefault();
 
     if (!editingId && !mediaFile) {
-      alert("Please select an image or video");
+      alert("Please select an image or video.");
       return;
     }
 
@@ -145,18 +309,16 @@ export default function GalleryAdminPage() {
         formData.append("media", mediaFile);
       }
 
-      const method = editingId ? "PUT" : "POST";
-      const url = editingId
-        ? `${API_URL}/${editingId}`
-        : API_URL;
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: formData,
-      });
+      const response = await fetch(
+        editingId ? `${API_URL}/${editingId}` : API_URL,
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
@@ -165,11 +327,11 @@ export default function GalleryAdminPage() {
         resetForm();
         await loadGallery();
       } else {
-        alert(data.message || "Unable to save gallery item");
+        alert(data.message || "Unable to save gallery item.");
       }
     } catch (err) {
-      console.error(err);
-      alert("Gallery upload failed");
+      console.error("Gallery save error:", err);
+      alert("Gallery upload failed.");
     } finally {
       setSaving(false);
     }
@@ -193,14 +355,11 @@ export default function GalleryAdminPage() {
       fileInputRef.current.value = "";
     }
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const deleteGallery = async (id) => {
-    if (!confirm("Delete this gallery image/video?")) return;
+    if (!window.confirm("Delete this gallery image/video?")) return;
 
     try {
       const response = await fetch(`${API_URL}/${id}`, {
@@ -212,94 +371,82 @@ export default function GalleryAdminPage() {
 
       const data = await response.json();
 
-      alert(data.message || "Delete completed");
+      alert(data.message || "Delete completed.");
 
       if (response.ok && data.success) {
         await loadGallery();
       }
     } catch (err) {
-      console.error(err);
-      alert("Unable to delete gallery item");
+      console.error("Gallery delete error:", err);
+      alert("Unable to delete gallery item.");
     }
   };
 
+  const currentItem = editingId
+    ? gallery.find((item) => item._id === editingId)
+    : null;
+
   const currentPreviewIsVideo =
     mediaFile?.type?.startsWith("video/") ||
-    (!mediaFile &&
-      editingId &&
-      gallery.find((item) => item._id === editingId)
-        ?.resourceType === "video");
+    (!mediaFile && currentItem?.resourceType === "video");
 
   return (
-    <div className="container mx-auto px-4 md:px-6 py-8">
-      <h1 className="text-3xl font-bold mb-6">
-        Gallery Management
-      </h1>
+    <div style={styles.page}>
+      <h1 style={styles.heading}>Gallery Management</h1>
 
-      <form
-        onSubmit={saveGallery}
-        className="bg-white rounded-xl shadow-lg p-5 md:p-6 mb-8 space-y-4"
-      >
-        <div>
-          <label className="block font-semibold mb-2">
-            Gallery Title
-          </label>
+      <form onSubmit={saveGallery} style={styles.form}>
+        <div style={styles.field}>
+          <label style={styles.label}>Gallery Title</label>
           <input
             type="text"
             name="title"
             placeholder="Example: Diwali Celebration"
             value={form.title}
             onChange={handleChange}
-            className="border w-full p-3 rounded-lg"
+            style={styles.input}
             required
           />
         </div>
 
-        <div>
-          <label className="block font-semibold mb-2">
-            Description
-          </label>
+        <div style={styles.field}>
+          <label style={styles.label}>Description</label>
           <textarea
             name="description"
             placeholder="Optional description"
             value={form.description}
             onChange={handleChange}
-            className="border w-full p-3 rounded-lg"
+            style={styles.textarea}
             rows={3}
           />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-semibold mb-2">
-              Category
-            </label>
+        <div style={styles.twoCol}>
+          <div style={styles.field}>
+            <label style={styles.label}>Category</label>
             <input
               type="text"
               name="category"
               placeholder="General"
               value={form.category}
               onChange={handleChange}
-              className="border w-full p-3 rounded-lg"
+              style={styles.input}
             />
           </div>
 
-          <div>
-            <label className="block font-semibold mb-2">
-              Display Order
-            </label>
+          <div style={styles.field}>
+            <label style={styles.label}>Display Order</label>
             <input
               type="number"
               name="displayOrder"
               value={form.displayOrder}
               onChange={handleChange}
-              className="border w-full p-3 rounded-lg"
+              style={styles.input}
             />
           </div>
         </div>
 
-        <div>
-          <label className="block font-semibold mb-2">
+        <div style={styles.field}>
+          <label style={styles.label}>
             {editingId
               ? "Replace Image / Video (optional)"
               : "Upload Image / Video"}
@@ -310,36 +457,39 @@ export default function GalleryAdminPage() {
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
             onChange={handleMediaChange}
-            className="border w-full p-3 rounded-lg bg-white"
+            style={styles.file}
             required={!editingId}
           />
 
-          <p className="text-sm text-gray-500 mt-2">
+          <div style={styles.help}>
             Supported: JPG, PNG, WEBP, GIF, MP4, WEBM, MOV. Maximum 100 MB.
-          </p>
+          </div>
         </div>
 
         {previewUrl && (
-          <div className="border rounded-xl p-3 max-w-xl">
-            <p className="font-semibold mb-2">Preview</p>
+          <div style={styles.previewBox}>
+            <div style={{ ...styles.label, marginBottom: "10px" }}>
+              Preview
+            </div>
 
             {currentPreviewIsVideo ? (
               <video
                 src={previewUrl}
                 controls
-                className="w-full max-h-80 rounded-lg bg-black"
+                playsInline
+                style={styles.previewMedia}
               />
             ) : (
               <img
                 src={previewUrl}
                 alt="Gallery preview"
-                className="w-full max-h-80 object-contain rounded-lg"
+                style={styles.previewMedia}
               />
             )}
           </div>
         )}
 
-        <label className="flex items-center gap-2">
+        <label style={styles.activeRow}>
           <input
             type="checkbox"
             name="isActive"
@@ -349,11 +499,14 @@ export default function GalleryAdminPage() {
           Active
         </label>
 
-        <div className="flex flex-wrap gap-4">
+        <div style={styles.buttons}>
           <button
             type="submit"
             disabled={saving}
-            className="bg-pink-600 disabled:opacity-60 text-white px-6 py-3 rounded-lg"
+            style={{
+              ...styles.uploadBtn,
+              opacity: saving ? 0.6 : 1,
+            }}
           >
             {saving
               ? "Uploading..."
@@ -365,7 +518,7 @@ export default function GalleryAdminPage() {
           <button
             type="button"
             onClick={resetForm}
-            className="bg-gray-500 text-white px-6 py-3 rounded-lg"
+            style={styles.resetBtn}
           >
             Reset
           </button>
@@ -373,83 +526,76 @@ export default function GalleryAdminPage() {
       </form>
 
       {loading ? (
-        <p className="text-center text-lg font-semibold">
+        <p style={{ color: "#ffffff", textAlign: "center" }}>
           Loading Gallery...
         </p>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div style={styles.grid}>
           {gallery.map((item) => {
             const mediaUrl = item.mediaUrl || item.image;
 
             return (
-              <div
-                key={item._id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
-              >
+              <div key={item._id} style={styles.card}>
                 {item.resourceType === "video" ? (
                   <video
                     src={mediaUrl}
                     controls
                     preload="metadata"
-                    className="w-full h-52 object-cover bg-black"
+                    playsInline
+                    style={styles.cardMedia}
                   />
                 ) : (
                   <img
                     src={mediaUrl}
                     alt={item.title}
-                    className="w-full h-52 object-cover"
+                    style={styles.cardMedia}
                   />
                 )}
 
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-xl font-bold">
-                      {item.title}
-                    </h2>
-
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full uppercase">
-                      {item.resourceType || "image"}
-                    </span>
-                  </div>
+                <div style={styles.cardBody}>
+                  <h2
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "700",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {item.title}
+                  </h2>
 
                   {item.description && (
-                    <p className="text-gray-600 mt-2">
+                    <p style={{ color: "#6b7280", marginBottom: "8px" }}>
                       {item.description}
                     </p>
                   )}
 
-                  <p className="mt-2">
-                    <b>Category:</b> {item.category}
-                  </p>
-
-                  <p>
-                    <b>Order:</b> {item.displayOrder}
-                  </p>
-
+                  <p><b>Type:</b> {item.resourceType || "image"}</p>
+                  <p><b>Category:</b> {item.category}</p>
+                  <p><b>Order:</b> {item.displayOrder}</p>
                   <p>
                     <b>Status:</b>{" "}
-                    {item.isActive ? (
-                      <span className="text-green-600">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-red-600">
-                        Inactive
-                      </span>
-                    )}
+                    <span
+                      style={{
+                        color: item.isActive ? "#16a34a" : "#dc2626",
+                      }}
+                    >
+                      {item.isActive ? "Active" : "Inactive"}
+                    </span>
                   </p>
 
-                  <div className="flex gap-3 mt-4">
+                  <div style={{ ...styles.buttons, marginTop: "14px" }}>
                     <button
+                      type="button"
                       onClick={() => editGallery(item)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                      style={styles.editBtn}
                     >
                       Edit
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => deleteGallery(item._id)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg"
+                      style={styles.deleteBtn}
                     >
                       Delete
                     </button>
@@ -460,10 +606,15 @@ export default function GalleryAdminPage() {
           })}
 
           {gallery.length === 0 && (
-            <div className="col-span-full text-center py-10">
-              <h2 className="text-2xl font-bold">
-                No Gallery Images / Videos Found
-              </h2>
+            <div
+              style={{
+                color: "#ffffff",
+                textAlign: "center",
+                gridColumn: "1 / -1",
+                padding: "30px",
+              }}
+            >
+              No Gallery Images / Videos Found
             </div>
           )}
         </div>
