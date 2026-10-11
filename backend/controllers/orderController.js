@@ -9,6 +9,66 @@ function formatCurrency(value) {
   return `₹${Number(value || 0).toLocaleString("en-IN")}`;
 }
 
+
+const COUPONS = {
+  MUTHU2026: {
+    minimumAmount: 5000,
+    discountPercentage: 5,
+  },
+  DIWALI2020: {
+    minimumAmount: 7500,
+    discountPercentage: 10,
+  },
+};
+
+function calculateOrderSubtotal(items = []) {
+  return items.reduce((sum, item) => {
+    const price = Number(item.offerPrice ?? item.price ?? 0);
+    const quantity = Number(item.quantity || 0);
+    return sum + price * quantity;
+  }, 0);
+}
+
+function applyCoupon(subtotal, rawCode) {
+  const couponCode = String(rawCode || "").trim().toUpperCase();
+
+  if (!couponCode) {
+    return {
+      couponCode: "",
+      discountPercentage: 0,
+      discountAmount: 0,
+      totalAmount: subtotal,
+    };
+  }
+
+  const coupon = COUPONS[couponCode];
+
+  if (!coupon) {
+    const error = new Error("Invalid offer code.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (subtotal < coupon.minimumAmount) {
+    const error = new Error(
+      `${couponCode} is available for orders of ₹${coupon.minimumAmount.toLocaleString("en-IN")} or more.`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const discountAmount = Number(
+    ((subtotal * coupon.discountPercentage) / 100).toFixed(2)
+  );
+
+  return {
+    couponCode,
+    discountPercentage: coupon.discountPercentage,
+    discountAmount,
+    totalAmount: Number((subtotal - discountAmount).toFixed(2)),
+  };
+}
+
 function generateOrderNumber() {
   const datePart = new Date()
     .toISOString()
@@ -206,6 +266,12 @@ function createInitialWhatsAppUrl(order) {
     `Order Number: ${order.orderNumber}`,
     `Name: ${order.customer.name}`,
     `Phone: ${order.customer.mobile}`,
+    ...(order.couponCode
+      ? [
+          `Offer Code: ${order.couponCode}`,
+          `Discount: ${order.discountPercentage}% (-${formatCurrency(order.discountAmount)})`,
+        ]
+      : []),
     `Total: ${formatCurrency(order.totalAmount)}`,
     "",
     "Please confirm my order.",
@@ -272,23 +338,36 @@ async function processOrderNotifications(order) {
 
 export const createOrder = async (req, res) => {
   try {
-    const orderData = {
-      ...req.body,
-      orderNumber:
-        req.body.orderNumber || generateOrderNumber(),
-    };
+    const items = Array.isArray(req.body.items) ? req.body.items : [];
+    const subtotalAmount = calculateOrderSubtotal(items);
 
     const settings = await Setting.findOne();
 
     const minimumOrder =
       Number(settings?.minimumOrderValue || 0);
 
-    if (Number(req.body.totalAmount) < minimumOrder) {
+    if (subtotalAmount < minimumOrder) {
       return res.status(400).json({
         success: false,
         message: `Minimum order value is ₹${minimumOrder}`,
       });
     }
+
+    const coupon = applyCoupon(
+      subtotalAmount,
+      req.body.couponCode
+    );
+
+    const orderData = {
+      ...req.body,
+      orderNumber:
+        req.body.orderNumber || generateOrderNumber(),
+      subtotalAmount,
+      couponCode: coupon.couponCode,
+      discountPercentage: coupon.discountPercentage,
+      discountAmount: coupon.discountAmount,
+      totalAmount: coupon.totalAmount,
+    };
 
     const order = await Order.create(orderData);
 
@@ -309,7 +388,7 @@ export const createOrder = async (req, res) => {
     console.error("Create order error:", error);
 
     if (!res.headersSent) {
-      res.status(500).json({
+      res.status(error.statusCode || 500).json({
         success: false,
         message: error.message,
       });
