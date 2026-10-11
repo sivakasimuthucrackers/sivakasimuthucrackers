@@ -62,7 +62,7 @@ export default function CheckoutPage() {
   const [minimumModalOpen, setMinimumModalOpen] = useState(false);
   const [successOrder, setSuccessOrder] = useState(null);
   const [couponInput, setCouponInput] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState("");
 
   useEffect(() => {
@@ -94,41 +94,53 @@ export default function CheckoutPage() {
   const minimumReached =
     minimumOrderValue === 0 || currentCartTotal >= minimumOrderValue;
 
-  const discountPercent = appliedCoupon === "MUTHU2026" ? 5 : 0;
-  const discountAmount = Math.round((currentCartTotal * discountPercent) / 100);
-  const finalTotal = Math.max(currentCartTotal - discountAmount, 0);
+  const discountAmount = appliedCoupon
+    ? Number(
+        (
+          (currentCartTotal * appliedCoupon.discountPercentage) /
+          100
+        ).toFixed(2)
+      )
+    : 0;
 
-  function applyCoupon() {
+  const finalTotal = Math.max(
+    Number((currentCartTotal - discountAmount).toFixed(2)),
+    0
+  );
+
+  function applyOfferCode() {
     const code = couponInput.trim().toUpperCase();
 
     if (!code) {
-      setAppliedCoupon("");
+      setAppliedCoupon(null);
       setCouponMessage("Please enter an offer code.");
       return;
     }
 
-    if (code !== "MUTHU2026") {
-      setAppliedCoupon("");
-      setCouponMessage("Invalid offer code.");
+    if (code === "MUTHU2026") {
+      if (currentCartTotal < 5000) {
+        setAppliedCoupon(null);
+        setCouponMessage(
+          "MUTHU2026 requires a cart total of ₹5,000 or more."
+        );
+        return;
+      }
+
+      setAppliedCoupon({
+        code: "MUTHU2026",
+        discountPercentage: 5,
+      });
+      setCouponMessage("MUTHU2026 applied — 5% discount.");
       return;
     }
 
-    if (currentCartTotal < 5000) {
-      setAppliedCoupon("");
-      setCouponMessage(
-        `Add ₹${(5000 - currentCartTotal).toLocaleString("en-IN")} more to use MUTHU2026.`
-      );
-      return;
-    }
-
-    setAppliedCoupon("MUTHU2026");
-    setCouponInput("MUTHU2026");
-    setCouponMessage("MUTHU2026 applied — 5% website discount.");
+    setAppliedCoupon(null);
+    setCouponMessage("Invalid offer code.");
   }
 
-  function removeCoupon() {
-    setAppliedCoupon("");
+  function removeOfferCode() {
     setCouponInput("");
+    setAppliedCoupon(null);
     setCouponMessage("");
   }
 
@@ -217,9 +229,11 @@ export default function CheckoutPage() {
           gstNumber: form.gstNumber.trim(),
         },
         items: buildOrderItems(),
-        cartTotal: currentCartTotal,
+        subtotalAmount: currentCartTotal,
+        couponCode: appliedCoupon?.code || "",
+        discountPercentage: appliedCoupon?.discountPercentage || 0,
+        discountAmount,
         totalAmount: finalTotal,
-        couponCode: appliedCoupon,
         paymentMethod: form.paymentMethod,
         paymentStatus: "Pending",
         orderStatus: "Pending",
@@ -435,12 +449,11 @@ clearCart();
 
             <div className="mt-5 border-t border-white/10 pt-4">
               <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-3">
-                <p className="text-sm font-black">Website Offer Code</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  Get 5% off on orders of ₹5,000 or more with MUTHU2026.
+                <p className="text-xs font-bold uppercase tracking-wider text-pink-400">
+                  Have an Offer Code?
                 </p>
 
-                <div className="mt-3 flex gap-2">
+                <div className="mt-2 flex gap-2">
                   <input
                     type="text"
                     value={couponInput}
@@ -448,43 +461,62 @@ clearCart();
                       setCouponInput(e.target.value.toUpperCase());
                       setCouponMessage("");
                     }}
-                    placeholder="Enter offer code"
+                    placeholder="Enter your offer code"
                     className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm uppercase outline-none focus:border-pink-500"
                   />
-                  {appliedCoupon ? (
-                    <button type="button" onClick={removeCoupon} className="rounded-lg border border-white/20 px-3 py-2 text-xs font-black">
-                      Remove
-                    </button>
-                  ) : (
-                    <button type="button" onClick={applyCoupon} className="rounded-lg bg-pink-600 px-4 py-2 text-xs font-black text-white">
-                      Apply
-                    </button>
-                  )}
+
+                  <button
+                    type="button"
+                    onClick={applyOfferCode}
+                    className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-black hover:bg-pink-700"
+                  >
+                    Apply
+                  </button>
                 </div>
 
                 {couponMessage && (
-                  <p className={`mt-2 text-xs font-bold ${appliedCoupon ? "text-green-400" : "text-yellow-300"}`}>
-                    {couponMessage}
-                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p
+                      className={`text-xs font-bold ${
+                        appliedCoupon ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
+                      {couponMessage}
+                    </p>
+
+                    {appliedCoupon && (
+                      <button
+                        type="button"
+                        onClick={removeOfferCode}
+                        className="shrink-0 text-xs font-bold text-gray-400 underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
-              <div className="mt-4 flex items-end justify-between gap-3">
-                <span className="font-bold">Cart Total</span>
-                <span className="text-lg font-black text-white">
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <span className="text-sm text-gray-300">Cart Subtotal</span>
+                <span className="font-bold">
                   ₹{currentCartTotal.toLocaleString("en-IN")}
                 </span>
               </div>
 
-              {discountAmount > 0 && (
-                <div className="mt-2 flex items-center justify-between gap-3 text-sm text-green-400">
-                  <span>Offer Discount (5%)</span>
-                  <span className="font-black">- ₹{discountAmount.toLocaleString("en-IN")}</span>
+              {appliedCoupon && (
+                <div className="mt-2 flex items-center justify-between gap-3 text-green-400">
+                  <span className="text-sm font-bold">
+                    Discount ({appliedCoupon.discountPercentage}%)
+                  </span>
+                  <span className="font-black">
+                    -₹{discountAmount.toLocaleString("en-IN")}
+                  </span>
                 </div>
               )}
 
               <div className="mt-3 flex items-end justify-between gap-3 border-t border-white/10 pt-3">
-                <span className="font-black">Amount to Pay</span>
+                <span className="font-black">Final Total</span>
                 <span className="text-2xl font-black text-yellow-400">
                   ₹{finalTotal.toLocaleString("en-IN")}
                 </span>
