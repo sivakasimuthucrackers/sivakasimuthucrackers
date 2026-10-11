@@ -61,6 +61,9 @@ export default function CheckoutPage() {
   const [formError, setFormError] = useState("");
   const [minimumModalOpen, setMinimumModalOpen] = useState(false);
   const [successOrder, setSuccessOrder] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponMessage, setCouponMessage] = useState("");
 
   useEffect(() => {
     async function loadSettings() {
@@ -90,6 +93,73 @@ export default function CheckoutPage() {
   const remainingAmount = Math.max(minimumOrderValue - currentCartTotal, 0);
   const minimumReached =
     minimumOrderValue === 0 || currentCartTotal >= minimumOrderValue;
+
+  const discountAmount = appliedCoupon
+    ? Number(
+        (
+          (currentCartTotal * appliedCoupon.discountPercentage) /
+          100
+        ).toFixed(2)
+      )
+    : 0;
+
+  const finalTotal = Math.max(
+    Number((currentCartTotal - discountAmount).toFixed(2)),
+    0
+  );
+
+  function applyOfferCode() {
+    const code = couponInput.trim().toUpperCase();
+
+    if (!code) {
+      setAppliedCoupon(null);
+      setCouponMessage("Please enter an offer code.");
+      return;
+    }
+
+    if (code === "DIWALI2020") {
+      if (currentCartTotal < 7500) {
+        setAppliedCoupon(null);
+        setCouponMessage(
+          "DIWALI2020 requires a cart total of ₹7,500 or more."
+        );
+        return;
+      }
+
+      setAppliedCoupon({
+        code: "DIWALI2020",
+        discountPercentage: 10,
+      });
+      setCouponMessage("DIWALI2020 applied — 10% discount.");
+      return;
+    }
+
+    if (code === "MUTHU2026") {
+      if (currentCartTotal < 5000) {
+        setAppliedCoupon(null);
+        setCouponMessage(
+          "MUTHU2026 requires a cart total of ₹5,000 or more."
+        );
+        return;
+      }
+
+      setAppliedCoupon({
+        code: "MUTHU2026",
+        discountPercentage: 5,
+      });
+      setCouponMessage("MUTHU2026 applied — 5% discount.");
+      return;
+    }
+
+    setAppliedCoupon(null);
+    setCouponMessage("Invalid offer code.");
+  }
+
+  function removeOfferCode() {
+    setCouponInput("");
+    setAppliedCoupon(null);
+    setCouponMessage("");
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -176,7 +246,11 @@ export default function CheckoutPage() {
           gstNumber: form.gstNumber.trim(),
         },
         items: buildOrderItems(),
-        totalAmount: currentCartTotal,
+        subtotalAmount: currentCartTotal,
+        couponCode: appliedCoupon?.code || "",
+        discountPercentage: appliedCoupon?.discountPercentage || 0,
+        discountAmount,
+        totalAmount: finalTotal,
         paymentMethod: form.paymentMethod,
         paymentStatus: "Pending",
         orderStatus: "Pending",
@@ -390,11 +464,85 @@ clearCart();
               ))}
             </div>
 
-            <div className="mt-5 flex items-end justify-between gap-3 border-t border-white/10 pt-4">
-              <span className="font-bold">Cart Total</span>
-              <span className="text-2xl font-black text-yellow-400">
-                ₹{currentCartTotal.toLocaleString("en-IN")}
-              </span>
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-pink-400">
+                  Website Offer Code
+                </p>
+
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    value={couponInput}
+                    onChange={(e) => {
+                      setCouponInput(e.target.value.toUpperCase());
+                      setCouponMessage("");
+                    }}
+                    placeholder="Enter offer code"
+                    className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm uppercase outline-none focus:border-pink-500"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={applyOfferCode}
+                    className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-black hover:bg-pink-700"
+                  >
+                    Apply
+                  </button>
+                </div>
+
+                <div className="mt-2 text-[11px] leading-5 text-gray-400">
+                  <p>MUTHU2026 — 5% off on ₹5,000+</p>
+                  <p>DIWALI2020 — 10% off on ₹7,500+</p>
+                </div>
+
+                {couponMessage && (
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p
+                      className={`text-xs font-bold ${
+                        appliedCoupon ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
+                      {couponMessage}
+                    </p>
+
+                    {appliedCoupon && (
+                      <button
+                        type="button"
+                        onClick={removeOfferCode}
+                        className="shrink-0 text-xs font-bold text-gray-400 underline"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <span className="text-sm text-gray-300">Cart Subtotal</span>
+                <span className="font-bold">
+                  ₹{currentCartTotal.toLocaleString("en-IN")}
+                </span>
+              </div>
+
+              {appliedCoupon && (
+                <div className="mt-2 flex items-center justify-between gap-3 text-green-400">
+                  <span className="text-sm font-bold">
+                    Discount ({appliedCoupon.discountPercentage}%)
+                  </span>
+                  <span className="font-black">
+                    -₹{discountAmount.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              )}
+
+              <div className="mt-3 flex items-end justify-between gap-3 border-t border-white/10 pt-3">
+                <span className="font-black">Final Total</span>
+                <span className="text-2xl font-black text-yellow-400">
+                  ₹{finalTotal.toLocaleString("en-IN")}
+                </span>
+              </div>
             </div>
 
             <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3 text-xs leading-5 text-yellow-200">
