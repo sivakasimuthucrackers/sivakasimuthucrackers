@@ -111,30 +111,10 @@ const orderSchema = new mongoose.Schema(
       },
     },
 
-    subtotalAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
-    couponCode: {
-      type: String,
-      default: "",
-      trim: true,
-      uppercase: true,
-    },
-
-    discountPercentage: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-
-    discountAmount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
+    cartTotal: { type: Number, default: 0, min: 0 },
+    couponCode: { type: String, default: "", trim: true, uppercase: true },
+    discountPercent: { type: Number, default: 0, min: 0, max: 100 },
+    discountAmount: { type: Number, default: 0, min: 0 },
 
     totalAmount: {
       type: Number,
