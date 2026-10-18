@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  FaDownload,
   FaEdit,
   FaImage,
   FaPlus,
@@ -43,6 +44,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -348,6 +350,56 @@ async function loadProducts() {
     return matchesSearch && matchesCategory;
   });
 
+  async function downloadProductsExcel() {
+    try {
+      setDownloadingExcel(true);
+      setError("");
+      setMessage("");
+
+      const token = localStorage.getItem("muthuAdminToken");
+
+      if (!token) {
+        router.push("/admin/login");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/import/export-products`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Unable to download product price list";
+
+        try {
+          const data = await response.json();
+          errorMessage = data.message || errorMessage;
+        } catch (_) {}
+
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = "MUTHU_CRACKERS_PRICE_LIST.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      setMessage("Current website products downloaded successfully");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDownloadingExcel(false);
+    }
+  }
+
   function clearFilters() {
     setSearchTerm("");
     setSelectedCategory("All");
@@ -371,14 +423,26 @@ async function loadProducts() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={openAddForm}
-            className="flex items-center gap-2 rounded-lg bg-pink-600 px-5 py-3 font-bold hover:bg-pink-700"
-          >
-            <FaPlus />
-            Add Product
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={downloadProductsExcel}
+              disabled={downloadingExcel}
+              className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-bold hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <FaDownload />
+              {downloadingExcel ? "Downloading..." : "Download Products Excel"}
+            </button>
+
+            <button
+              type="button"
+              onClick={openAddForm}
+              className="flex items-center gap-2 rounded-lg bg-pink-600 px-5 py-3 font-bold hover:bg-pink-700"
+            >
+              <FaPlus />
+              Add Product
+            </button>
+          </div>
         </div>
 
         {message && (
