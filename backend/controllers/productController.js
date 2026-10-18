@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import generateSlug from "../utils/generateSlug.js";
+import * as XLSX from "xlsx";
 
 async function createUniqueSlug(name, currentProductId = null) {
   const baseSlug = generateSlug(name);
@@ -347,3 +348,131 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+
+// Admin: Download current website products in price-list Excel format
+export const exportProductsPriceList = async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true })
+      .sort({ category: 1, createdAt: 1, _id: 1 })
+      .lean();
+
+    const rows = [
+      ["SIVAKASI MUTHU CRACKERS", "", "", "", "", "", "", ""],
+      ["DADDY'S ♦ RR PRYO TECH ♦ MOTHERS ♦ WOW STAR ♦ STAR VEL ♦ VADIVEL", "", "", "", "", "", "", ""],
+      [
+        "Contact No : 7010400258, 9600333302   www.sivakasimuthucrackers.com   Email : sivakasimuthucrackers@gmail.com",
+        "", "", "", "", "", "", "",
+      ],
+      ["Address :", "", "", "", "", "Discount %", 80, ""],
+      ["Email id :", "", "", "", "", "Total", 0, 0],
+      ["Sl.No", "Description", "Size/Pcs", "Unit", "Rate", "Qty Req.", "Amount", "Net Amount"],
+    ];
+
+    let serialNumber = 1;
+    let currentCategory = null;
+    const productRowNumbers = [];
+
+    for (const product of products) {
+      const category = String(product.category || "UNCATEGORIZED").trim().toUpperCase();
+
+      if (category !== currentCategory) {
+        rows.push([category, "", "", "", "", "", "", ""]);
+        currentCategory = category;
+      }
+
+      rows.push([
+        serialNumber,
+        product.name || "",
+        "",
+        product.unit || "Box",
+        Number(product.mrp || 0),
+        0,
+        0,
+        0,
+      ]);
+
+      // Excel row number is the current rows length after push.
+      productRowNumbers.push(rows.length);
+      serialNumber += 1;
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+
+    // Match the customer price-list structure.
+    worksheet["!merges"] = [
+      XLSX.utils.decode_range("A1:H1"),
+      XLSX.utils.decode_range("A2:H2"),
+      XLSX.utils.decode_range("A3:H3"),
+    ];
+
+    worksheet["!cols"] = [
+      { wch: 9 },
+      { wch: 42 },
+      { wch: 14 },
+      { wch: 13 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 14 },
+      { wch: 16 },
+    ];
+
+    // Keep the same quantity/amount behaviour as the existing price list.
+    for (const excelRow of productRowNumbers) {
+      worksheet[`G${excelRow}`] = {
+        t: "n",
+        f: `E${excelRow}*F${excelRow}`,
+        v: 0,
+      };
+      worksheet[`H${excelRow}`] = {
+        t: "n",
+        f: `G${excelRow}-(G${excelRow}*$G$4)/100`,
+        v: 0,
+      };
+    }
+
+    if (productRowNumbers.length > 0) {
+      const firstProductRow = productRowNumbers[0];
+      const lastProductRow = productRowNumbers[productRowNumbers.length - 1];
+
+      worksheet.G5 = {
+        t: "n",
+        f: `SUM(G${firstProductRow}:G${lastProductRow})`,
+        v: 0,
+      };
+      worksheet.H5 = {
+        t: "n",
+        f: `SUM(H${firstProductRow}:H${lastProductRow})`,
+        v: 0,
+      };
+    }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Price List 2026");
+
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+      compression: true,
+    });
+
+    const fileName = "MUTHU_CRACKERS_PRICE_LIST.xlsx";
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${fileName}"`
+    );
+    res.setHeader("Cache-Control", "no-store");
+
+    return res.send(excelBuffer);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Unable to export products",
+    });
+  }
+};
+
