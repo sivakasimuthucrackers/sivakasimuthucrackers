@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 
 import { protectAdmin } from "../middleware/adminAuth.js";
+import { exportProductsPriceList } from "../controllers/productController.js";
 import {
   importProductsFromExcel,
   getCurrentPriceList,
@@ -51,6 +52,9 @@ const acceptExcelFile = [
 
 // Public route for the main website to get latest Cloudinary Excel URL.
 router.get("/price-list", getCurrentPriceList);
+
+// Admin: download current active website products in the same price-list Excel layout.
+router.get("/export-products", protectAdmin, exportProductsPriceList);
 
 router.post("/", ...acceptExcelFile);
 router.post("/products", ...acceptExcelFile);
