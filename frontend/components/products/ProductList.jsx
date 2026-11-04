@@ -202,8 +202,8 @@ export default function ProductList() {
         className="h-9 w-full appearance-none rounded-lg border border-white/10 bg-[#151515] pl-10 pr-3 text-sm text-white outline-none transition focus:border-pink-500"
       >
         <option value="name-asc">Name: A to Z</option>
-        <option value="price-low">Price: Low to High</option>
-        <option value="price-high">Price: High to Low</option>
+        
+        
         <option value="discount-high">Highest Discount</option>
         <option value="newest">Newest Products</option>
       </select>

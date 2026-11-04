@@ -16,8 +16,8 @@ export default function ProductCard({ product }) {
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const mrp = Number(product?.mrp || 0);
-  const offerPrice = Number(product?.offerPrice || 0);
+  const mrp = 0;
+  const offerPrice = 0;
   const discount = Number(product?.discount || 0);
   const savings = Math.max(mrp - offerPrice, 0);
   const stockQuantity = Number(product?.stockQuantity ?? 0);
@@ -62,7 +62,7 @@ export default function ProductCard({ product }) {
             <span className="text-4xl">🎆</span>
           )}
 
-          {discount > 0 && (
+          {false && discount > 0 && (
             <span className="absolute left-2 top-2 rounded-full bg-yellow-400 px-2 py-1 text-[10px] font-black text-black">
               {discount}% OFF
             </span>
@@ -81,7 +81,7 @@ export default function ProductCard({ product }) {
               </h3>
             </Link>
 
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="hidden mt-2 flex flex-wrap items-center gap-2">
               <span className="text-xl font-black text-yellow-400">
                 ₹{offerPrice.toLocaleString("en-IN")}
               </span>
@@ -92,14 +92,14 @@ export default function ProductCard({ product }) {
               )}
             </div>
 
-            {savings > 0 && (
+            {false && savings > 0 && (
               <p className="mt-1 text-[11px] font-bold text-green-400">
                 Save ₹{savings.toLocaleString("en-IN")}
               </p>
             )}
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
+          <div className="hidden mt-2 flex items-center gap-2">
             <div className="flex h-8 items-center rounded-lg border border-white/10 bg-black/40">
               <button type="button" onClick={decreaseQuantity} aria-label="Decrease quantity" className="flex h-8 w-8 items-center justify-center text-xs transition hover:text-pink-500">
                 <FaMinus />
@@ -133,7 +133,7 @@ export default function ProductCard({ product }) {
             ) : (
               <span className="text-8xl">🎆</span>
             )}
-            {discount > 0 && (
+            {false && discount > 0 && (
               <span className="absolute left-4 top-4 rounded-full bg-yellow-400 px-3 py-1 text-sm font-black text-black">
                 {discount}% OFF
               </span>
@@ -147,14 +147,14 @@ export default function ProductCard({ product }) {
             <h3 className="mt-2 min-h-14 text-lg font-black leading-7 hover:text-pink-500">{product?.name || "Product"}</h3>
           </Link>
 
-          <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div className="hidden mt-4 flex flex-wrap items-end gap-3">
             <span className="text-2xl font-black text-yellow-400">₹{offerPrice.toLocaleString("en-IN")}</span>
             {mrp > offerPrice && <span className="text-gray-500 line-through">₹{mrp.toLocaleString("en-IN")}</span>}
           </div>
 
-          {savings > 0 && <p className="mt-2 text-sm font-bold text-green-400">You save ₹{savings.toLocaleString("en-IN")}</p>}
+          {false && savings > 0 && <p className="mt-2 text-sm font-bold text-green-400">You save ₹{savings.toLocaleString("en-IN")}</p>}
 
-          <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="hidden mt-5 flex items-center justify-between gap-3">
             <div className="flex items-center rounded-xl border border-white/10 bg-black/30">
               <button type="button" onClick={decreaseQuantity} className="p-3 hover:text-pink-500"><FaMinus /></button>
               <span className="min-w-10 text-center font-black">{quantity}</span>
@@ -167,7 +167,7 @@ export default function ProductCard({ product }) {
             type="button"
             onClick={handleAddToCart}
             disabled={!isAvailable}
-            className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-black transition ${
+            className={`hidden mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-black transition ${
               added ? "bg-green-600" : "bg-pink-600 hover:bg-pink-700"
             } disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400`}
           >
