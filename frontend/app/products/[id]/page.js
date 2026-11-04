@@ -97,7 +97,7 @@ Product: ${product.name}
 Product Code: ${product.productCode}
 Category: ${product.category}
 Quantity: ${quantity}
-Offer Price: ₹${product.offerPrice}
+Product catalogue - online orders temporarily closed
 
 Please confirm availability and delivery details.`
     );
@@ -148,8 +148,8 @@ Please confirm availability and delivery details.`
     );
   }
 
-  const mrp = Number(product.mrp || 0);
-  const offerPrice = Number(product.offerPrice || 0);
+  const mrp = 0;
+  const offerPrice = 0;
   const discount = Number(product.discount || 0);
   const savings = Math.max(mrp - offerPrice, 0);
 
@@ -244,7 +244,7 @@ Please confirm availability and delivery details.`
               </p>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-end gap-3 md:mt-7 md:gap-4">
+            <div className="hidden mt-4 flex flex-wrap items-end gap-3 md:mt-7 md:gap-4">
               <span className="text-3xl font-black text-yellow-400 md:text-4xl">
                 ₹{offerPrice.toLocaleString("en-IN")}
               </span>
@@ -254,7 +254,7 @@ Please confirm availability and delivery details.`
               </span>
             </div>
 
-            {savings > 0 && (
+            {false && savings > 0 && (
               <p className="mt-3 font-bold text-green-400">
                 You save ₹{savings.toLocaleString("en-IN")}
               </p>
@@ -284,7 +284,7 @@ Please confirm availability and delivery details.`
               </p>
             </div>
 
-            <div className="mt-5 flex items-center justify-between gap-4 md:mt-7 md:block">
+            <div className="hidden mt-5 flex items-center justify-between gap-4 md:mt-7 md:block">
               <p className="font-bold md:mb-3">Quantity</p>
 
               <div className="flex w-fit items-center rounded-xl border border-white/10 bg-black/40">
@@ -312,7 +312,7 @@ Please confirm availability and delivery details.`
               </div>
             </div>
 
-<div className="mt-5 grid grid-cols-2 gap-3 md:mt-8 md:gap-4">
+<div className="hidden mt-5 grid grid-cols-2 gap-3 md:mt-8 md:gap-4">
   <button
     type="button"
     onClick={addSelectedQuantityToCart}
